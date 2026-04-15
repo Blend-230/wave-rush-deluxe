@@ -200,6 +200,12 @@
       animation: popIn .42s cubic-bezier(.2,.9,.2,1);
     }
 
+    .result-badge {
+      width: 74px; height: 74px; margin: 0 auto 12px; border-radius: 999px;
+      display: grid; place-items: center; font-size: 2rem; font-weight: 900; color: #fff;
+      background: radial-gradient(circle at 30% 25%, #fef08a, #f59e0b);
+      box-shadow: 0 10px 22px rgba(245, 158, 11, 0.38);
+    }
     .result-title { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 900; letter-spacing: .5px; }
     .result-sub { margin-top: 10px; color: #e9e5ff; line-height: 1.6; }
     .result-reward { margin-top: 16px; color: #fde68a; font-weight: 800; font-size: 1.12rem; }
@@ -207,7 +213,7 @@
 
     .confetti {
       position: fixed; width: 10px; height: 18px; border-radius: 4px; opacity: .95; pointer-events: none; z-index: 54;
-      animation: confettiFall 1.6s linear forwards;
+      animation: confettiFall var(--dur, 1.7s) linear forwards;
     }
 
     @keyframes confettiFall {
@@ -459,6 +465,7 @@
 
   <div class="result-screen hidden" id="levelCompleteScreen">
     <div class="result-card glass">
+      <div class="result-badge">✓</div>
       <div class="result-title" id="levelCompleteTitle">Level Complete</div>
       <div class="result-sub" id="levelCompleteSubtitle">Great job! Your wave run was clean and controlled.</div>
       <div class="result-reward" id="levelCompleteReward">+0 coins</div>
@@ -472,6 +479,7 @@
 
   <div class="result-screen hidden" id="finalVictoryScreen">
     <div class="result-card glass">
+      <div class="result-badge">★</div>
       <div class="result-title">🏆 Final Victory</div>
       <div class="result-sub">You completed all 50 levels. Excellent focus, persistence, and control.</div>
       <div class="result-reward">Wave Rush Deluxe fully completed!</div>
@@ -715,20 +723,24 @@
     function hideResultScreens() {
       levelCompleteScreen.classList.add('hidden');
       finalVictoryScreen.classList.add('hidden');
+      if (menuScreen.classList.contains('hidden')) gameControls.classList.remove('hidden');
     }
 
     function spawnConfettiBurst() {
       const colors = ['#fde047', '#a78bfa', '#60a5fa', '#34d399', '#ffffff'];
-      for (let i = 0; i < 42; i++) {
+      for (let i = 0; i < 64; i++) {
         const c = document.createElement('div');
         c.className = 'confetti';
         c.style.left = `${Math.random() * 100}vw`;
         c.style.top = `${-8 - Math.random() * 18}vh`;
         c.style.background = colors[Math.floor(Math.random() * colors.length)];
         c.style.setProperty('--dx', `${Math.random() * 40 - 20}vw`);
+        c.style.setProperty('--dur', `${1.3 + Math.random() * 1.2}s`);
+        c.style.width = `${6 + Math.random() * 7}px`;
+        c.style.height = `${10 + Math.random() * 14}px`;
         c.style.animationDelay = `${Math.random() * 0.28}s`;
         document.body.appendChild(c);
-        setTimeout(() => c.remove(), 1900);
+        setTimeout(() => c.remove(), 2700);
       }
     }
 
@@ -738,11 +750,13 @@
       document.getElementById('levelCompleteReward').textContent = `+${reward} coins earned`;
       const nextBtn = document.getElementById('nextLevelOverlayBtn');
       nextBtn.classList.toggle('hidden', currentLevel >= 50);
+      gameControls.classList.add('hidden');
       levelCompleteScreen.classList.remove('hidden');
       spawnConfettiBurst();
     }
 
     function showFinalVictoryScreen() {
+      gameControls.classList.add('hidden');
       finalVictoryScreen.classList.remove('hidden');
       spawnConfettiBurst();
       setTimeout(spawnConfettiBurst, 280);
@@ -1073,7 +1087,7 @@
         hideResultScreens();
         cancelAnimationFrame(animationId);
         draw();
-        overlayMessage('LEVEL ' + currentLevel + ' COMPLETE', funnyEnabled ? `${reward} coins. ${pick(funnyWinTexts)}` : `+${reward} coins`);
+        overlayMessage('LEVEL COMPLETE', 'Preparing your result screen...');
         showToast(`+${reward} coins`);
         document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 50);
         setTimeout(() => {
