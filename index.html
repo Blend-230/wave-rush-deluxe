@@ -180,6 +180,65 @@
       position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 20; flex-wrap: wrap;
     }
 
+    .finish-screen {
+      position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 50% 32%, rgba(253, 224, 71, 0.2), rgba(4, 2, 15, 0.88) 58%);
+      padding: 22px;
+    }
+    .finish-card {
+      width: min(680px, 94vw);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: linear-gradient(170deg, rgba(44, 10, 82, 0.9), rgba(13, 8, 36, 0.95));
+      box-shadow: 0 30px 80px rgba(0,0,0,.52), 0 0 40px rgba(253, 230, 138, 0.12);
+      backdrop-filter: blur(16px);
+      padding: 30px;
+      text-align: center;
+      animation: finishIn .42s cubic-bezier(.2,.9,.2,1);
+    }
+    .finish-eyebrow {
+      color: #fde68a;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .finish-title {
+      margin-top: 12px;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      font-weight: 900;
+      text-shadow: 0 0 20px rgba(255,255,255,.18);
+    }
+    .finish-subtitle {
+      margin-top: 12px;
+      line-height: 1.6;
+      color: #e9ddff;
+      font-size: 1.02rem;
+    }
+    .finish-stats {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .finish-stat {
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .finish-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @keyframes finishIn {
+      from { opacity: 0; transform: translateY(18px) scale(.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     @media (max-width: 940px) {
       .hero, .spin-wheel-wrap { grid-template-columns: 1fr; }
       .topbar { flex-direction: column; align-items: stretch; }
@@ -426,6 +485,24 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="finish-screen hidden" id="finishScreen">
+    <div class="finish-card">
+      <div class="finish-eyebrow" id="finishEyebrow">Level Complete</div>
+      <div class="finish-title" id="finishTitle">Great Run!</div>
+      <div class="finish-subtitle" id="finishSubtitle">You cleared the tunnel. Choose what to do next.</div>
+      <div class="finish-stats">
+        <div class="finish-stat"><div class="label">Level</div><div class="value" id="finishLevel">1</div></div>
+        <div class="finish-stat"><div class="label">Reward</div><div class="value" id="finishReward">+0</div></div>
+        <div class="finish-stat"><div class="label">Unlocked</div><div class="value" id="finishUnlocked">1</div></div>
+      </div>
+      <div class="finish-actions">
+        <button id="finishNextBtn" class="play">Next Level</button>
+        <button id="finishRestartBtn" class="green">Restart</button>
+        <button id="finishMenuBtn" class="purple">Back to Menu</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -447,6 +524,14 @@
     const levelSelect = document.getElementById('levelSelect');
     const levelsPreviewGrid = document.getElementById('levelsPreviewGrid');
     const spinWheel = document.getElementById('spinWheel');
+    const finishScreen = document.getElementById('finishScreen');
+    const finishEyebrowEl = document.getElementById('finishEyebrow');
+    const finishTitleEl = document.getElementById('finishTitle');
+    const finishSubtitleEl = document.getElementById('finishSubtitle');
+    const finishLevelEl = document.getElementById('finishLevel');
+    const finishRewardEl = document.getElementById('finishReward');
+    const finishUnlockedEl = document.getElementById('finishUnlocked');
+    const finishNextBtn = document.getElementById('finishNextBtn');
 
     const homePage = document.getElementById('homePage');
     const difficultyPage = document.getElementById('difficultyPage');
@@ -703,8 +788,11 @@
     }
 
     function openMenu(page = homePage) {
+      cancelAnimationFrame(animationId);
+      gameStarted = false;
       menuScreen.classList.remove('hidden');
       gameControls.classList.add('hidden');
+      finishScreen.classList.add('hidden');
       statusEl.textContent = 'Menu';
       renderDifficultyCards();
       renderSkins();
@@ -867,7 +955,7 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
-    let stars = [], sparkles = [], walls = [];
+    let stars = [], sparkles = [], walls = [], confetti = [];
     function seedStars() {
       stars = [];
       for (let i = 0; i < 140; i++) stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.8 + 0.3, a: Math.random() * 0.7 + 0.15 });
@@ -925,9 +1013,10 @@
       currentLevel = Number(level);
       store.lastLevel = currentLevel; saveStore();
       frame = 0; progress = 0; finishCelebration = 0; gameStarted = true; paused = false; gameOver = false; levelDone = false; holding = false;
-      walls = []; sparkles = []; player.x = W * 0.2; player.y = H * 0.5; player.vy = 0; player.angle = 0; player.trail = [];
+      walls = []; sparkles = []; confetti = []; player.x = W * 0.2; player.y = H * 0.5; player.vy = 0; player.angle = 0; player.trail = [];
       levelEl.textContent = currentLevel; progressEl.textContent = '0%'; modeEl.textContent = selectedDifficulty; statusEl.textContent = 'Running';
       document.getElementById('nextLevelBtn').classList.add('hidden');
+      finishScreen.classList.add('hidden');
       closeMenu(); generateLevel(); loop();
     }
 
@@ -960,6 +1049,7 @@
       if (!levelDone && progress >= 100) {
         levelDone = true;
         finishCelebration = 140;
+        statusEl.textContent = 'Completing...';
         const reward = rewardCoinsForLevel(currentLevel);
         store.coins += reward;
         if (currentLevel >= store.bestUnlocked && store.bestUnlocked < 50) store.bestUnlocked = currentLevel + 1;
@@ -971,19 +1061,28 @@
         overlayMessage('LEVEL ' + currentLevel + ' COMPLETE', funnyEnabled ? `${reward} coins. ${pick(funnyWinTexts)}` : `+${reward} coins`);
         showToast(`+${reward} coins`);
         document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 50);
-        if (currentLevel >= 50) {
-          store.completedGame = true;
-          saveStore();
-          setTimeout(() => {
-            openMenu(homePage);
-            showToast('🏆 You finished all 50 levels. Beautiful run!');
-          }, 900);
-        }
-
+        spawnConfetti(currentLevel >= 50 ? 220 : 120);
+        setTimeout(() => showFinishScreen(reward, currentLevel >= 50), 520);
       }
     }
 
     function createSpark() { sparkles.push({ x: player.x - 10, y: player.y, dx: -2 - Math.random() * 2.5, dy: (Math.random() - 0.5) * 1.8, life: 1, size: 2 + Math.random() * 4 }); }
+    function spawnConfetti(amount = 120) {
+      const colors = ['#fde047', '#f472b6', '#60a5fa', '#34d399', '#f97316', '#a78bfa', '#ffffff'];
+      for (let i = 0; i < amount; i++) {
+        confetti.push({
+          x: rand(W * 0.2, W * 0.9),
+          y: rand(-H * 0.25, H * 0.35),
+          dx: rand(-2.2, 2.2),
+          dy: rand(1.1, 4.2),
+          size: rand(5, 11),
+          rot: rand(0, Math.PI * 2),
+          spin: rand(-0.12, 0.12),
+          color: pick(colors),
+          life: rand(0.8, 1.4)
+        });
+      }
+    }
     function updateSparkles() {
       createSpark();
       for (let i = sparkles.length - 1; i >= 0; i--) {
@@ -992,6 +1091,15 @@
         s.y += s.dy;
         s.life -= s.winner ? 0.02 : 0.03;
         if (s.life <= 0) sparkles.splice(i, 1);
+      }
+      for (let i = confetti.length - 1; i >= 0; i--) {
+        const c = confetti[i];
+        c.x += c.dx;
+        c.y += c.dy;
+        c.rot += c.spin;
+        c.dy += 0.02;
+        c.life -= 0.006;
+        if (c.y > H + 30 || c.life <= 0) confetti.splice(i, 1);
       }
     }
 
@@ -1009,6 +1117,7 @@
     function crash() {
       if (gameOver || levelDone) return;
       gameOver = true; statusEl.textContent = 'Game Over'; cancelAnimationFrame(animationId);
+      finishScreen.classList.add('hidden');
       for (let i = 0; i < 32; i++) sparkles.push({ x: player.x, y: player.y, dx: rand(-5, 5), dy: rand(-5, 5), life: 1, size: 3 + Math.random() * 6 });
       draw();
       overlayMessage('GAME OVER', funnyEnabled ? pick(funnyLoseTexts) : 'Restart për me provu prap');
@@ -1148,6 +1257,39 @@
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
     }
 
+    function drawConfetti() {
+      for (const c of confetti) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, c.life);
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.rot);
+        ctx.fillStyle = c.color;
+        ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size * 0.65);
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function showFinishScreen(reward, finalVictory) {
+      finishLevelEl.textContent = currentLevel;
+      finishRewardEl.textContent = `+${reward} coins`;
+      finishUnlockedEl.textContent = store.bestUnlocked;
+      finishNextBtn.classList.toggle('hidden', finalVictory);
+      if (finalVictory) {
+        store.completedGame = true;
+        saveStore();
+        finishEyebrowEl.textContent = 'Grand Victory';
+        finishTitleEl.textContent = '🏆 You Beat All 50 Levels!';
+        finishSubtitleEl.textContent = 'Legendary consistency. Enjoy the confetti and celebrate your perfect finish.';
+        statusEl.textContent = 'Final Victory';
+      } else {
+        finishEyebrowEl.textContent = 'Level Complete';
+        finishTitleEl.textContent = `Level ${currentLevel} Cleared`;
+        finishSubtitleEl.textContent = 'Smooth run. Reward secured. Continue your progress or restart for a cleaner run.';
+      }
+      finishScreen.classList.remove('hidden');
+    }
+
     function drawFinishOverlay() {
       if (!levelDone) return;
       const boxW = Math.min(520, W * 0.78);
@@ -1172,10 +1314,18 @@
       ctx.restore();
     }
 
-    function draw() { drawBackground(); drawWaveTunnel(); drawSparkles(); drawPlayer(); drawFinishOverlay(); }
+    function draw() { drawBackground(); drawWaveTunnel(); drawSparkles(); drawConfetti(); drawPlayer(); drawFinishOverlay(); }
     function loop() {
-      if (!gameStarted || paused || gameOver || levelDone) return;
-      frame++; updatePlayer(); updateWalls(); updateSparkles(); checkCollision(); draw(); animationId = requestAnimationFrame(loop);
+      if (!gameStarted || paused || gameOver) return;
+      frame++;
+      if (!levelDone) {
+        updatePlayer();
+        updateWalls();
+        checkCollision();
+      }
+      updateSparkles();
+      draw();
+      animationId = requestAnimationFrame(loop);
     }
 
     function togglePause() { if (!gameStarted || gameOver || levelDone) return; paused = !paused; statusEl.textContent = paused ? 'Paused' : 'Running'; if (!paused) loop(); }
@@ -1328,6 +1478,21 @@
       startGame(nextLevel);
     };
     levelSelect.onchange = () => { currentLevel = Number(levelSelect.value); renderLevelsGrid(); };
+    document.getElementById('finishNextBtn').onclick = () => {
+      finishScreen.classList.add('hidden');
+      if (currentLevel >= 50) return openMenu(homePage);
+      const nextLevel = Math.min(50, currentLevel + 1);
+      if (nextLevel > store.bestUnlocked && !isAdmin) return showToast('Next level locked');
+      startGame(nextLevel);
+    };
+    document.getElementById('finishRestartBtn').onclick = () => {
+      finishScreen.classList.add('hidden');
+      startGame(currentLevel);
+    };
+    document.getElementById('finishMenuBtn').onclick = () => {
+      finishScreen.classList.add('hidden');
+      openMenu(homePage);
+    };
 
     const sessionUser = getSessionUser();
     if (sessionUser && setCurrentUser(sessionUser)) {
