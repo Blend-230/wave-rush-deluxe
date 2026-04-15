@@ -197,6 +197,7 @@
       <div class="stat"><div class="label">Best</div><div class="value" id="best">1</div></div>
       <div class="stat"><div class="label">Difficulty</div><div class="value" id="mode">Easy</div></div>
       <div class="stat"><div class="label">Status</div><div class="value" id="status">Menu</div></div>
+      <div class="stat"><div class="label">User</div><div class="value" id="currentUserLabel">Guest</div></div>
     </div>
 
     <div class="glass quick-actions">
@@ -237,6 +238,9 @@
               <button id="levelsBtn">Levels</button>
               <button id="rewardsBtn">Rewards</button>
               <button id="aboutBtn">About</button>
+              <button id="loginBtn">Login</button>
+              <button id="registerBtn">Register</button>
+              <button id="logoutBtn">Logout</button>
               <button id="adminBtn" class="danger">Admin</button>
             </div>
           </div>
@@ -360,7 +364,7 @@
 
       <div class="page hidden" id="adminPage">
         <div class="section-title">Admin Panel</div>
-        <div class="section-sub">Panel lokal për kontroll të lojës. Ky version punon vetëm në browserin tënd dhe s’menaxhon usera realë online.</div>
+        <div class="section-sub">Panel lokal për kontroll të lojës dhe userave. Vetëm admin mund ta përdorë.</div>
         <div class="settings">
           <div class="setting-box">
             <div class="setting-title">Economy</div>
@@ -391,6 +395,17 @@
             </div>
           </div>
 
+
+          <div class="setting-box">
+            <div class="setting-title">User Manager</div>
+            <div class="setting-text">Menaxho coins për userat lokalë dhe kontrollo account-et.</div>
+            <div class="small-actions">
+              <select id="adminUserSelect"></select>
+              <button id="adminAddCoinsToUserBtn" class="green">+250 Coins</button>
+              <button id="adminResetUserProgressBtn" class="danger">Reset User Progress</button>
+            </div>
+          </div>
+
           <div class="setting-box">
             <div class="setting-title">Maintenance</div>
             <div class="setting-text">Reset save ose dil nga admin mode.</div>
@@ -406,6 +421,7 @@
 
   <div class="bottom-controls hidden" id="gameControls">
     <button id="restartBtn" class="green">Restart</button>
+    <button id="nextLevelBtn" class="play hidden">Next Level</button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -420,6 +436,7 @@
     const bestEl = document.getElementById('best');
     const modeEl = document.getElementById('mode');
     const statusEl = document.getElementById('status');
+    const currentUserLabelEl = document.getElementById('currentUserLabel');
     const shopCoinsEl = document.getElementById('shopCoins');
     const spinTimerEl = document.getElementById('spinTimer');
     const selectedDifficultyPreviewEl = document.getElementById('selectedDifficultyPreview');
@@ -461,30 +478,12 @@
     ];
 
     const rareSkinIds = ['plasma', 'void'];
+    const ADMIN_USERNAME = 'admin';
     const ADMIN_PASSWORD = 'admin123';
     let isAdmin = false;
+    let currentUser = null;
     const funnyWinTexts = ['Too easy 😎', 'Clean run!', 'Bro is locked in.', 'Certified gamer moment.'];
     const funnyLoseTexts = ['Unlucky. Totally the game’s fault.', 'That wall came outta nowhere.', 'Almost looked pro there.', 'One more try. Obviously.'];
-
-    function loadStore() {
-      const raw = localStorage.getItem('wave_rush_deluxe_save');
-      if (!raw) return defaultStore();
-      try {
-        const p = JSON.parse(raw);
-        return {
-          coins: p.coins ?? 0,
-          bestUnlocked: p.bestUnlocked ?? 1,
-          selectedDifficulty: p.selectedDifficulty || 'Easy',
-          selectedSkin: p.selectedSkin || 'starter',
-          ownedSkins: p.ownedSkins || ['starter'],
-          lastSpinAt: p.lastSpinAt || 0,
-          glowEnabled: p.glowEnabled !== false,
-          funnyEnabled: p.funnyEnabled !== false,
-          volume: p.volume ?? 70,
-          lastLevel: p.lastLevel || 1
-        };
-      } catch { return defaultStore(); }
-    }
 
     function defaultStore() {
       return {
@@ -497,17 +496,111 @@
         glowEnabled: true,
         funnyEnabled: true,
         volume: 70,
-        lastLevel: 1
+        lastLevel: 1,
+        completedGame: false
       };
     }
 
-    let store = loadStore();
+    function normalizeStore(data = {}) {
+      return {
+        coins: Number.isFinite(data.coins) ? data.coins : 0,
+        bestUnlocked: Math.min(50, Math.max(1, data.bestUnlocked ?? 1)),
+        selectedDifficulty: difficulties[data.selectedDifficulty] ? data.selectedDifficulty : 'Easy',
+        selectedSkin: data.selectedSkin || 'starter',
+        ownedSkins: Array.isArray(data.ownedSkins) && data.ownedSkins.length ? [...new Set(['starter', ...data.ownedSkins])] : ['starter'],
+        lastSpinAt: data.lastSpinAt || 0,
+        glowEnabled: data.glowEnabled !== false,
+        funnyEnabled: data.funnyEnabled !== false,
+        volume: Math.min(100, Math.max(0, data.volume ?? 70)),
+        lastLevel: Math.min(50, Math.max(1, data.lastLevel || 1)),
+        completedGame: !!data.completedGame
+      };
+    }
+
+    function loadUsers() {
+      const raw = localStorage.getItem('wave_rush_deluxe_users');
+      if (!raw) {
+        const users = [{ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() }];
+        localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
+        return users;
+      }
+      try {
+        const users = JSON.parse(raw);
+        if (!Array.isArray(users)) throw new Error('Invalid users payload');
+        const adminExists = users.some(u => u.username === ADMIN_USERNAME && u.isAdmin);
+        if (!adminExists) users.unshift({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() });
+        return users.map(u => ({ ...u, data: normalizeStore(u.data || {}) }));
+      } catch {
+        const users = [{ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() }];
+        localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
+        return users;
+      }
+    }
+
+    function saveUsers() {
+      localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
+    }
+
+    function migrateLegacySaveIfNeeded() {
+      const raw = localStorage.getItem('wave_rush_deluxe_save');
+      if (!raw) return;
+      try {
+        const legacy = normalizeStore(JSON.parse(raw));
+        const admin = users.find(u => u.username === ADMIN_USERNAME);
+        if (admin && (!admin.data || admin.data.bestUnlocked === 1 && admin.data.coins === 0)) {
+          admin.data = legacy;
+        }
+        localStorage.removeItem('wave_rush_deluxe_save');
+        saveUsers();
+      } catch {}
+    }
+
+    let users = loadUsers();
+    migrateLegacySaveIfNeeded();
+
+    function setCurrentUser(username) {
+      const user = users.find(u => u.username === username);
+      if (!user) return false;
+      currentUser = user;
+      isAdmin = !!user.isAdmin;
+      localStorage.setItem('wave_rush_deluxe_session', user.username);
+      store = normalizeStore(user.data || {});
+      selectedDifficulty = store.selectedDifficulty;
+      selectedSkin = store.selectedSkin;
+      glowEnabled = store.glowEnabled;
+      funnyEnabled = store.funnyEnabled;
+      return true;
+    }
+
+    function getSessionUser() {
+      return localStorage.getItem('wave_rush_deluxe_session');
+    }
+
+    function clearSession() {
+      localStorage.removeItem('wave_rush_deluxe_session');
+      currentUser = null;
+      isAdmin = false;
+    }
+
+    let store = defaultStore();
     let selectedDifficulty = store.selectedDifficulty;
     let selectedSkin = store.selectedSkin;
     let glowEnabled = store.glowEnabled;
     let funnyEnabled = store.funnyEnabled;
 
-    function saveStore() { localStorage.setItem('wave_rush_deluxe_save', JSON.stringify(store)); }
+    function saveStore() {
+      if (!currentUser) return;
+      store.selectedDifficulty = selectedDifficulty;
+      store.selectedSkin = selectedSkin;
+      store.glowEnabled = glowEnabled;
+      store.funnyEnabled = funnyEnabled;
+      const idx = users.findIndex(u => u.username === currentUser.username);
+      if (idx !== -1) {
+        users[idx].data = normalizeStore(store);
+        currentUser = users[idx];
+        saveUsers();
+      }
+    }
 
     function syncSkinOwnership() { skins.forEach(s => s.owned = s.price === 0 || store.ownedSkins.includes(s.id)); }
     syncSkinOwnership();
@@ -520,6 +613,16 @@
     }
     levelSelect.value = String(store.lastLevel || 1);
 
+    function refreshLevelSelectAccess() {
+      [...levelSelect.options].forEach(opt => {
+        const lv = Number(opt.value);
+        const unlocked = isAdmin || lv <= store.bestUnlocked;
+        opt.disabled = !unlocked;
+        opt.textContent = `Level ${lv}${unlocked ? '' : ' 🔒'}`;
+      });
+      if (Number(levelSelect.value) > store.bestUnlocked && !isAdmin) levelSelect.value = String(store.bestUnlocked);
+    }
+
     function updateTopbar() {
       coinsEl.textContent = store.coins;
       bestEl.textContent = store.bestUnlocked;
@@ -529,6 +632,12 @@
       selectedSkinPreviewEl.textContent = (skins.find(s => s.id === selectedSkin)?.name) || 'Starter';
       document.getElementById('volumeRange').value = store.volume;
       document.getElementById('volumeValue').textContent = store.volume;
+      currentUserLabelEl.textContent = currentUser ? currentUser.username : 'Guest';
+      document.getElementById('adminBtn').style.display = isAdmin ? '' : 'none';
+      document.getElementById('logoutBtn').style.display = currentUser ? '' : 'none';
+      document.getElementById('loginBtn').style.display = currentUser ? 'none' : '';
+      document.getElementById('registerBtn').style.display = currentUser ? 'none' : '';
+      refreshLevelSelectAccess();
     }
 
     function showToast(msg) {
@@ -543,6 +652,56 @@
       page.classList.remove('hidden');
     }
 
+    function requireLogin() {
+      if (currentUser) return true;
+      showToast('Login required to play.');
+      return false;
+    }
+
+    function loginFlow() {
+      const username = prompt('Username');
+      if (username === null) return;
+      const password = prompt('Password');
+      if (password === null) return;
+      const user = users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+      if (!user || user.password !== password) return showToast('Invalid credentials');
+      setCurrentUser(user.username);
+      syncSkinOwnership();
+      renderSkins();
+      updateTopbar();
+      showToast(`Welcome ${user.username}!`);
+    }
+
+    function registerFlow() {
+      const usernameRaw = prompt('Choose username (3-16 chars)');
+      if (usernameRaw === null) return;
+      const username = usernameRaw.trim();
+      if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) return showToast('Use 3-16 letters/numbers/_');
+      if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) return showToast('Username already exists');
+      const password = prompt('Choose password (min 4 chars)');
+      if (password === null) return;
+      if (password.length < 4) return showToast('Password too short');
+      users.push({ username, password, isAdmin: false, data: defaultStore() });
+      saveUsers();
+      setCurrentUser(username);
+      syncSkinOwnership();
+      renderSkins();
+      updateTopbar();
+      showToast('Account created');
+    }
+
+    function populateAdminUsers() {
+      const select = document.getElementById('adminUserSelect');
+      if (!select) return;
+      select.innerHTML = '';
+      users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.username;
+        opt.textContent = `${u.username}${u.isAdmin ? ' (admin)' : ''}`;
+        select.appendChild(opt);
+      });
+    }
+
     function openMenu(page = homePage) {
       menuScreen.classList.remove('hidden');
       gameControls.classList.add('hidden');
@@ -551,6 +710,7 @@
       renderSkins();
       renderSpinPage();
       renderLevelsGrid();
+      populateAdminUsers();
       updateTopbar();
       showPage(page);
     }
@@ -643,6 +803,7 @@
 
     let spinning = false;
     function doDailySpin() {
+      if (!requireLogin()) return;
       if (spinning) return;
       if (getTimeUntilNextSpin() > 0) return showToast('Spin nuk është gati ende.');
       spinning = true;
@@ -681,10 +842,12 @@
       levelsPreviewGrid.innerHTML = '';
       for (let i = 1; i <= 50; i++) {
         const card = document.createElement('div');
-        card.className = 'card selectable' + (Number(levelSelect.value) === i ? ' selected' : '');
-        const tag = i <= 10 ? 'Easy' : i <= 20 ? 'Normal' : i <= 30 ? 'Hard' : i <= 40 ? 'Extreme' : 'Insane';
-        card.innerHTML = `<div class="card-title">Level ${i}</div><div class="card-text">Tier: ${tag}</div>`;
+        const unlocked = isAdmin || i <= store.bestUnlocked;
+        card.className = 'card' + (unlocked ? ' selectable' : '') + (Number(levelSelect.value) === i ? ' selected' : '');
+        const tag = i <= 10 ? 'Easy' : i <= 20 ? 'Hard' : i <= 30 ? 'Extreme' : 'Insane';
+        card.innerHTML = `<div class="card-title">Level ${i}${unlocked ? '' : ' 🔒'}</div><div class="card-text">Tier: ${tag}${unlocked ? '' : ' • Locked'}</div>`;
         card.onclick = () => {
+          if (!unlocked) return showToast('Level is locked. Beat previous levels first.');
           levelSelect.value = String(i);
           renderLevelsGrid();
         };
@@ -716,7 +879,7 @@
 
     let animationId = null, gameStarted = false, paused = false, gameOver = false, levelDone = false, holding = false, frame = 0, progress = 0, finishCelebration = 0;
     let currentLevel = store.lastLevel || 1;
-    const segmentWidth = 220, segmentsToClear = 22;
+    const segmentWidth = 220, segmentsToClear = 20;
     const player = { x: W * 0.2, y: H * 0.5, vy: 0, accel: 0.42, angle: 0, trail: [] };
 
     function baseLevelSettings(level) {
@@ -731,7 +894,7 @@
       const base = baseLevelSettings(level);
       const diff = difficulties[selectedDifficulty];
       return {
-        gap: Math.max(70, base.gap + diff.gapBonus),
+        gap: Math.max(selectedDifficulty === 'Insane' ? 78 : 86, base.gap + diff.gapBonus),
         speed: base.speed * diff.speedMul,
         jitter: base.jitter * diff.jitterMul,
         pattern: base.pattern
@@ -757,12 +920,14 @@
     }
 
     function startGame(level = currentLevel) {
+      if (!requireLogin()) return;
       cancelAnimationFrame(animationId);
       currentLevel = Number(level);
       store.lastLevel = currentLevel; saveStore();
       frame = 0; progress = 0; finishCelebration = 0; gameStarted = true; paused = false; gameOver = false; levelDone = false; holding = false;
       walls = []; sparkles = []; player.x = W * 0.2; player.y = H * 0.5; player.vy = 0; player.angle = 0; player.trail = [];
       levelEl.textContent = currentLevel; progressEl.textContent = '0%'; modeEl.textContent = selectedDifficulty; statusEl.textContent = 'Running';
+      document.getElementById('nextLevelBtn').classList.add('hidden');
       closeMenu(); generateLevel(); loop();
     }
 
@@ -787,6 +952,7 @@
     function updateWalls() {
       const cfg = getConfig(currentLevel);
       walls.forEach(w => w.x -= cfg.speed);
+      if (!walls.length) return;
       const totalLength = segmentsToClear * segmentWidth;
       const traveled = Math.max(0, (W + 180) - walls[0].x);
       progress = Math.min(100, Math.floor((traveled / totalLength) * 100));
@@ -804,6 +970,16 @@
         cancelAnimationFrame(animationId); draw();
         overlayMessage('LEVEL ' + currentLevel + ' COMPLETE', funnyEnabled ? `${reward} coins. ${pick(funnyWinTexts)}` : `+${reward} coins`);
         showToast(`+${reward} coins`);
+        document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 50);
+        if (currentLevel >= 50) {
+          store.completedGame = true;
+          saveStore();
+          setTimeout(() => {
+            openMenu(homePage);
+            showToast('🏆 You finished all 50 levels. Beautiful run!');
+          }, 900);
+        }
+
       }
     }
 
@@ -821,10 +997,11 @@
 
     function rectHit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
     function checkCollision() {
-      const p = { x: player.x - 14, y: player.y - 14, w: 28, h: 28 };
+      const p = { x: player.x - 11, y: player.y - 11, w: 22, h: 22 };
       for (const wall of walls) {
-        const topRect = { x: wall.x, y: 0, w: wall.width, h: wall.gapY };
-        const botRect = { x: wall.x, y: wall.gapY + wall.gapH, w: wall.width, h: H - (wall.gapY + wall.gapH) };
+        const topRect = { x: wall.x + 3, y: 0, w: Math.max(0, wall.width - 6), h: wall.gapY };
+        const botRect = { x: wall.x + 3, y: wall.gapY + wall.gapH, w: Math.max(0, wall.width - 6), h: H - (wall.gapY + wall.gapH) };
+        if (wall.x + wall.width < p.x + 2) continue;
         if (rectHit(p, topRect) || rectHit(p, botRect)) return crash();
       }
     }
@@ -991,7 +1168,7 @@
       ctx.fillText('Finish reached!', W / 2, y + 42);
       ctx.font = 'bold 18px Arial';
       ctx.fillStyle = '#fde68a';
-      ctx.fillText('Level complete • reward collected • ready for next run', W / 2, y + 78);
+      ctx.fillText(currentLevel >= 50 ? 'All levels conquered • enjoy your victory' : 'Level complete • reward collected • ready for next run', W / 2, y + 78);
       ctx.restore();
     }
 
@@ -1018,23 +1195,35 @@
     canvas.addEventListener('touchend', () => holding = false);
 
     document.getElementById('playBtn').onclick = () => startGame(Number(levelSelect.value || currentLevel));
+    document.getElementById('loginBtn').onclick = loginFlow;
+    document.getElementById('registerBtn').onclick = registerFlow;
+    document.getElementById('logoutBtn').onclick = () => {
+      clearSession();
+      store = defaultStore();
+      selectedDifficulty = store.selectedDifficulty;
+      selectedSkin = store.selectedSkin;
+      updateTopbar();
+      showToast('Logged out');
+      openMenu(homePage);
+    };
     document.getElementById('adminBtn').onclick = () => {
-      const pass = prompt('Admin password');
-      if (pass === ADMIN_PASSWORD) {
-        isAdmin = true;
-        showToast('Admin mode enabled');
+      if (!currentUser || !isAdmin) return showToast('Admin account only');
+      const pass = prompt('Confirm admin password');
+      if (pass === currentUser.password) {
+        populateAdminUsers();
+        showToast('Admin panel opened');
         showPage(adminPage);
       } else if (pass !== null) {
         showToast('Wrong password');
       }
     };
     document.getElementById('difficultyBtn').onclick = () => showPage(difficultyPage);
-    document.getElementById('skinsBtn').onclick = () => { renderSkins(); showPage(skinsPage); };
-    document.getElementById('spinBtn').onclick = () => { renderSpinPage(); showPage(spinPage); };
-    document.getElementById('optionsBtn').onclick = () => showPage(optionsPage);
+    document.getElementById('skinsBtn').onclick = () => { if (!requireLogin()) return; renderSkins(); showPage(skinsPage); };
+    document.getElementById('spinBtn').onclick = () => { if (!requireLogin()) return; renderSpinPage(); showPage(spinPage); };
+    document.getElementById('optionsBtn').onclick = () => { if (!requireLogin()) return; showPage(optionsPage); };
     document.getElementById('continueBtn').onclick = () => startGame(store.lastLevel || 1);
-    document.getElementById('levelsBtn').onclick = () => { renderLevelsGrid(); showPage(levelsPage); };
-    document.getElementById('rewardsBtn').onclick = () => { renderSpinPage(); showPage(spinPage); };
+    document.getElementById('levelsBtn').onclick = () => { if (!requireLogin()) return; renderLevelsGrid(); showPage(levelsPage); };
+    document.getElementById('rewardsBtn').onclick = () => { if (!requireLogin()) return; renderSpinPage(); showPage(spinPage); };
     document.getElementById('aboutBtn').onclick = () => showPage(aboutPage);
 
     document.getElementById('difficultyPlayBtn').onclick = () => startGame(Number(levelSelect.value || currentLevel));
@@ -1046,8 +1235,7 @@
     document.getElementById('aboutBackBtn').onclick = () => showPage(homePage);
     document.getElementById('adminBackBtn').onclick = () => showPage(homePage);
     document.getElementById('adminLogoutBtn').onclick = () => {
-      isAdmin = false;
-      showToast('Admin mode disabled');
+      showToast('Admin panel closed');
       showPage(homePage);
     };
 
@@ -1079,6 +1267,35 @@
       if (!isAdmin) return showToast('Admin only');
       store.bestUnlocked = 50; saveStore(); updateTopbar(); showToast('All 50 levels unlocked');
     };
+    document.getElementById('adminAddCoinsToUserBtn').onclick = () => {
+      if (!isAdmin) return showToast('Admin only');
+      const username = document.getElementById('adminUserSelect').value;
+      const user = users.find(u => u.username === username);
+      if (!user) return;
+      user.data = normalizeStore(user.data || {});
+      user.data.coins += 250;
+      saveUsers();
+      if (currentUser && currentUser.username === username) {
+        store = normalizeStore(user.data);
+        updateTopbar();
+      }
+      showToast(`+250 coins to ${username}`);
+    };
+    document.getElementById('adminResetUserProgressBtn').onclick = () => {
+      if (!isAdmin) return showToast('Admin only');
+      const username = document.getElementById('adminUserSelect').value;
+      const user = users.find(u => u.username === username);
+      if (!user) return;
+      user.data = defaultStore();
+      saveUsers();
+      if (currentUser && currentUser.username === username) {
+        store = defaultStore();
+        selectedDifficulty = store.selectedDifficulty;
+        selectedSkin = store.selectedSkin;
+        updateTopbar();
+      }
+      showToast(`Reset progress: ${username}`);
+    };
 
     document.getElementById('doSpinBtn').onclick = doDailySpin;
     document.getElementById('playChosenLevelBtn').onclick = () => startGame(Number(levelSelect.value));
@@ -1089,7 +1306,11 @@
       funnyEnabled = !funnyEnabled; store.funnyEnabled = funnyEnabled; saveStore(); showToast(funnyEnabled ? 'Funny text enabled' : 'Funny text disabled');
     };
     document.getElementById('resetSaveBtn').onclick = () => {
-      localStorage.removeItem('wave_rush_deluxe_save'); location.reload();
+      if (!confirm('Reset all local users and progress?')) return;
+      localStorage.removeItem('wave_rush_deluxe_save');
+      localStorage.removeItem('wave_rush_deluxe_users');
+      localStorage.removeItem('wave_rush_deluxe_session');
+      location.reload();
     };
 
     document.getElementById('volumeRange').oninput = (e) => {
@@ -1100,8 +1321,18 @@
     document.getElementById('pauseBtn').onclick = togglePause;
     document.getElementById('fullscreenBtn').onclick = toggleFullscreen;
     document.getElementById('restartBtn').onclick = () => startGame(currentLevel);
+    document.getElementById('nextLevelBtn').onclick = () => {
+      if (currentLevel >= 50) return openMenu(homePage);
+      const nextLevel = Math.min(50, currentLevel + 1);
+      if (nextLevel > store.bestUnlocked && !isAdmin) return showToast('Next level locked');
+      startGame(nextLevel);
+    };
     levelSelect.onchange = () => { currentLevel = Number(levelSelect.value); renderLevelsGrid(); };
 
+    const sessionUser = getSessionUser();
+    if (sessionUser && setCurrentUser(sessionUser)) {
+      syncSkinOwnership();
+    }
     updateTopbar();
     renderDifficultyCards();
     renderSkins();
