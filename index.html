@@ -168,6 +168,22 @@
     .setting-text { color: #ddd6fe; margin-top: 8px; line-height: 1.55; }
     .range-row { margin-top: 14px; display: flex; gap: 12px; align-items: center; }
     .range-row span { min-width: 38px; text-align: right; font-weight: 800; }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .92rem; }
+    .admin-table th, .admin-table td { border-bottom: 1px solid rgba(255,255,255,.14); padding: 8px; text-align: left; }
+    .admin-table th { color: #fde68a; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; }
+    .pill { padding: 4px 8px; border-radius: 999px; font-size: .75rem; font-weight: 800; display: inline-block; }
+    .pill.ok { background: rgba(34,197,94,.24); }
+    .pill.warn { background: rgba(251,191,36,.24); }
+    .pill.danger { background: rgba(239,68,68,.25); }
+    textarea, input[type="text"] {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      padding: 10px 12px;
+      font-size: .95rem;
+    }
 
     .toast {
       position: fixed; top: 92px; right: 20px; z-index: 60; padding: 14px 16px; border-radius: 16px;
@@ -296,6 +312,7 @@
               <button id="continueBtn">Continue</button>
               <button id="levelsBtn">Levels</button>
               <button id="rewardsBtn">Rewards</button>
+              <button id="feedbackBtn">Feedback</button>
               <button id="aboutBtn">About</button>
               <button id="loginBtn">Login</button>
               <button id="registerBtn">Register</button>
@@ -421,53 +438,85 @@
         <div class="small-actions"><button id="aboutBackBtn">Back</button></div>
       </div>
 
-      <div class="page hidden" id="adminPage">
-        <div class="section-title">Admin Panel</div>
-        <div class="section-sub">Panel lokal për kontroll të lojës dhe userave. Vetëm admin mund ta përdorë.</div>
+      <div class="page hidden" id="feedbackPage">
+        <div class="section-title">Feedback & Support</div>
+        <div class="section-sub">Send comments, bug reports, gameplay feedback, or help requests linked to your account.</div>
         <div class="settings">
           <div class="setting-box">
-            <div class="setting-title">Economy</div>
-            <div class="setting-text">Shto coins për testim ose evente speciale.</div>
+            <div class="setting-title">New Submission</div>
             <div class="small-actions">
-              <button id="add100CoinsBtn" class="green">+100 Coins</button>
-              <button id="add500CoinsBtn" class="green">+500 Coins</button>
-              <button id="set9999CoinsBtn" class="purple">Set 9999</button>
+              <select id="feedbackType">
+                <option>Comment</option>
+                <option>Bug Report</option>
+                <option>Gameplay Feedback</option>
+                <option>Help Request</option>
+              </select>
             </div>
+            <div style="margin-top:10px;"><textarea id="feedbackMessage" rows="5" placeholder="Write your message here..."></textarea></div>
+            <div class="small-actions"><button id="submitFeedbackBtn" class="play">Submit Feedback</button></div>
+          </div>
+          <div class="setting-box">
+            <div class="setting-title">My Recent Submissions</div>
+            <div id="myFeedbackList" class="card-text">No submissions yet.</div>
+          </div>
+        </div>
+        <div class="small-actions"><button id="feedbackBackBtn">Back</button></div>
+      </div>
+
+      <div class="page hidden" id="adminPage">
+        <div class="section-title">Admin Dashboard</div>
+        <div class="section-sub">Only the real admin account can use this panel. Manage users, bans, and feedback safely.</div>
+        <div class="settings">
+          <div class="setting-box">
+            <div class="setting-title">User Moderation</div>
+            <div class="small-actions">
+              <input type="text" id="adminUserSearch" placeholder="Search username...">
+              <select id="adminUserSelect"></select>
+              <button id="adminAddCoinsToUserBtn" class="green">+250 Coins</button>
+              <button id="adminRemoveCoinsFromUserBtn" class="danger">-250 Coins</button>
+              <button id="adminResetUserProgressBtn" class="danger">Reset Progress</button>
+              <select id="banDurationSelect">
+                <option value="86400000">Ban 1 Day</option>
+                <option value="604800000">Ban 1 Week</option>
+                <option value="2629800000">Ban 1 Month</option>
+                <option value="31557600000">Ban 1 Year</option>
+                <option value="permanent">Ban Permanent</option>
+              </select>
+              <input type="text" id="banReasonInput" placeholder="Ban reason...">
+              <button id="banUserBtn" class="danger">Ban User</button>
+              <button id="unbanUserBtn" class="green">Unban User</button>
+            </div>
+            <table class="admin-table">
+              <thead><tr><th>User</th><th>Created</th><th>Last Login</th><th>Progress</th><th>Coins</th><th>Status</th></tr></thead>
+              <tbody id="adminUsersTableBody"></tbody>
+            </table>
           </div>
 
           <div class="setting-box">
-            <div class="setting-title">Skins & Rewards</div>
-            <div class="setting-text">Hapi krejt skinat ose bone spin gati menjëherë.</div>
+            <div class="setting-title">Feedback Inbox</div>
             <div class="small-actions">
-              <button id="unlockAllSkinsBtn" class="purple">Unlock All Skins</button>
-              <button id="resetSpinBtn" class="blue">Reset Daily Spin</button>
+              <select id="feedbackFilter">
+                <option value="unread">Unread</option>
+                <option value="all">All</option>
+              </select>
+              <input type="text" id="feedbackUserFilter" placeholder="Filter by username...">
+              <button id="markFeedbackReadBtn" class="blue">Mark Visible as Read</button>
             </div>
+            <table class="admin-table">
+              <thead><tr><th>User</th><th>Type</th><th>Date</th><th>Status</th><th>Message</th></tr></thead>
+              <tbody id="adminFeedbackTableBody"></tbody>
+            </table>
           </div>
 
           <div class="setting-box">
-            <div class="setting-title">Level Control</div>
-            <div class="setting-text">Ndrysho levelin që don me testu ose hape krejt nivelet.</div>
+            <div class="setting-title">Game Controls</div>
             <div class="small-actions">
               <select id="adminLevelSelect"></select>
               <button id="setAdminLevelBtn" class="play">Set Current Level</button>
               <button id="unlockAllLevelsBtn" class="green">Unlock All 50</button>
+              <button id="unlockAllSkinsBtn" class="purple">Unlock All Skins</button>
+              <button id="resetSpinBtn" class="blue">Reset Daily Spin</button>
             </div>
-          </div>
-
-
-          <div class="setting-box">
-            <div class="setting-title">User Manager</div>
-            <div class="setting-text">Menaxho coins për userat lokalë dhe kontrollo account-et.</div>
-            <div class="small-actions">
-              <select id="adminUserSelect"></select>
-              <button id="adminAddCoinsToUserBtn" class="green">+250 Coins</button>
-              <button id="adminResetUserProgressBtn" class="danger">Reset User Progress</button>
-            </div>
-          </div>
-
-          <div class="setting-box">
-            <div class="setting-title">Maintenance</div>
-            <div class="setting-text">Reset save ose dil nga admin mode.</div>
             <div class="small-actions">
               <button id="adminBackBtn">Back</button>
               <button id="adminLogoutBtn" class="danger">Exit Admin</button>
@@ -540,6 +589,7 @@
     const levelsPage = document.getElementById('levelsPage');
     const optionsPage = document.getElementById('optionsPage');
     const aboutPage = document.getElementById('aboutPage');
+    const feedbackPage = document.getElementById('feedbackPage');
     const adminPage = document.getElementById('adminPage');
 
     const difficultyList = document.getElementById('difficultyList');
@@ -602,21 +652,35 @@
       };
     }
 
+    function ensureUserShape(user) {
+      return {
+        username: user.username,
+        password: user.password || '1234',
+        isAdmin: user.username === ADMIN_USERNAME,
+        createdAt: user.createdAt || new Date().toISOString(),
+        lastLoginAt: user.lastLoginAt || null,
+        banned: user.banned && typeof user.banned === 'object' ? user.banned : { active: false, reason: '', until: null, bannedAt: null },
+        data: normalizeStore(user.data || {})
+      };
+    }
+
     function loadUsers() {
       const raw = localStorage.getItem('wave_rush_deluxe_users');
       if (!raw) {
-        const users = [{ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() }];
+        const users = [ensureUserShape({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() })];
         localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
         return users;
       }
       try {
-        const users = JSON.parse(raw);
+        let users = JSON.parse(raw);
         if (!Array.isArray(users)) throw new Error('Invalid users payload');
-        const adminExists = users.some(u => u.username === ADMIN_USERNAME && u.isAdmin);
-        if (!adminExists) users.unshift({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() });
-        return users.map(u => ({ ...u, data: normalizeStore(u.data || {}) }));
+        users = users.map(ensureUserShape);
+        const adminExists = users.some(u => u.username === ADMIN_USERNAME);
+        if (!adminExists) users.unshift(ensureUserShape({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() }));
+        users.forEach(u => { u.isAdmin = u.username === ADMIN_USERNAME; });
+        return users;
       } catch {
-        const users = [{ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() }];
+        const users = [ensureUserShape({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() })];
         localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
         return users;
       }
@@ -646,6 +710,12 @@
     function setCurrentUser(username) {
       const user = users.find(u => u.username === username);
       if (!user) return false;
+      const banState = getBanState(user);
+      if (banState.active) {
+        showToast(banState.message);
+        return false;
+      }
+      user.lastLoginAt = new Date().toISOString();
       currentUser = user;
       isAdmin = !!user.isAdmin;
       localStorage.setItem('wave_rush_deluxe_session', user.username);
@@ -654,6 +724,7 @@
       selectedSkin = store.selectedSkin;
       glowEnabled = store.glowEnabled;
       funnyEnabled = store.funnyEnabled;
+      saveUsers();
       return true;
     }
 
@@ -672,6 +743,31 @@
     let selectedSkin = store.selectedSkin;
     let glowEnabled = store.glowEnabled;
     let funnyEnabled = store.funnyEnabled;
+    let feedbackEntries = JSON.parse(localStorage.getItem('wave_rush_deluxe_feedback') || '[]');
+
+    function saveFeedback() {
+      localStorage.setItem('wave_rush_deluxe_feedback', JSON.stringify(feedbackEntries));
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '—';
+      return d.toLocaleString();
+    }
+
+    function getBanState(user = currentUser) {
+      if (!user || !user.banned?.active) return { active: false, message: '' };
+      if (user.banned.until && Date.now() > user.banned.until) {
+        user.banned = { active: false, reason: '', until: null, bannedAt: null };
+        saveUsers();
+        return { active: false, message: '' };
+      }
+      const isPermanent = !user.banned.until;
+      const duration = isPermanent ? 'Permanent ban' : `Banned until ${new Date(user.banned.until).toLocaleString()}`;
+      const reason = user.banned.reason || 'No reason specified';
+      return { active: true, message: `${duration}. Reason: ${reason}` };
+    }
 
     function saveStore() {
       if (!currentUser) return;
@@ -722,6 +818,7 @@
       document.getElementById('logoutBtn').style.display = currentUser ? '' : 'none';
       document.getElementById('loginBtn').style.display = currentUser ? 'none' : '';
       document.getElementById('registerBtn').style.display = currentUser ? 'none' : '';
+      document.getElementById('feedbackBtn').style.display = currentUser ? '' : 'none';
       refreshLevelSelectAccess();
     }
 
@@ -733,7 +830,7 @@
     }
 
     function showPage(page) {
-      [homePage, difficultyPage, skinsPage, spinPage, levelsPage, optionsPage, aboutPage, adminPage].forEach(p => p.classList.add('hidden'));
+      [homePage, difficultyPage, skinsPage, spinPage, levelsPage, optionsPage, aboutPage, feedbackPage, adminPage].forEach(p => p.classList.add('hidden'));
       page.classList.remove('hidden');
     }
 
@@ -750,6 +847,8 @@
       if (password === null) return;
       const user = users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
       if (!user || user.password !== password) return showToast('Invalid credentials');
+      const banState = getBanState(user);
+      if (banState.active) return showToast(banState.message);
       setCurrentUser(user.username);
       syncSkinOwnership();
       renderSkins();
@@ -766,7 +865,7 @@
       const password = prompt('Choose password (min 4 chars)');
       if (password === null) return;
       if (password.length < 4) return showToast('Password too short');
-      users.push({ username, password, isAdmin: false, data: defaultStore() });
+      users.push(ensureUserShape({ username, password, isAdmin: false, data: defaultStore() }));
       saveUsers();
       setCurrentUser(username);
       syncSkinOwnership();
@@ -778,12 +877,49 @@
     function populateAdminUsers() {
       const select = document.getElementById('adminUserSelect');
       if (!select) return;
+      const search = document.getElementById('adminUserSearch')?.value?.toLowerCase() || '';
       select.innerHTML = '';
-      users.forEach(u => {
+      users.filter(u => u.username.toLowerCase().includes(search)).forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.username;
         opt.textContent = `${u.username}${u.isAdmin ? ' (admin)' : ''}`;
         select.appendChild(opt);
+      });
+    }
+
+    function renderAdminUsersTable() {
+      const body = document.getElementById('adminUsersTableBody');
+      if (!body) return;
+      const search = document.getElementById('adminUserSearch')?.value?.toLowerCase() || '';
+      body.innerHTML = '';
+      users.filter(u => u.username.toLowerCase().includes(search)).forEach(u => {
+        const ban = getBanState(u);
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${u.username}${u.isAdmin ? ' (admin)' : ''}</td>
+          <td>${formatDate(u.createdAt)}</td>
+          <td>${formatDate(u.lastLoginAt)}</td>
+          <td>L${u.data.lastLevel} / Best ${u.data.bestUnlocked}</td>
+          <td>${u.data.coins}</td>
+          <td><span class="pill ${ban.active ? 'danger' : 'ok'}">${ban.active ? 'Banned' : 'Active'}</span></td>`;
+        body.appendChild(row);
+      });
+    }
+
+    function renderFeedbackViews() {
+      const mine = document.getElementById('myFeedbackList');
+      if (mine && currentUser) {
+        const rows = feedbackEntries.filter(f => f.username === currentUser.username).slice(-8).reverse();
+        mine.innerHTML = rows.length ? rows.map(r => `<div style="margin-bottom:8px;"><b>${r.type}</b> • ${formatDate(r.createdAt)} • ${r.read ? 'Read' : 'Unread'}<br>${r.message}</div>`).join('') : 'No submissions yet.';
+      }
+      const body = document.getElementById('adminFeedbackTableBody');
+      if (!body) return;
+      const mode = document.getElementById('feedbackFilter')?.value || 'unread';
+      const userFilter = (document.getElementById('feedbackUserFilter')?.value || '').toLowerCase();
+      body.innerHTML = '';
+      feedbackEntries.filter(f => (mode === 'all' || !f.read) && (!userFilter || f.username.toLowerCase().includes(userFilter))).slice().reverse().forEach(f => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${f.username}</td><td>${f.type}</td><td>${formatDate(f.createdAt)}</td><td><span class="pill ${f.read ? 'ok' : 'warn'}">${f.read ? 'Read' : 'Unread'}</span></td><td>${f.message}</td>`;
+        body.appendChild(tr);
       });
     }
 
@@ -799,6 +935,8 @@
       renderSpinPage();
       renderLevelsGrid();
       populateAdminUsers();
+      renderAdminUsersTable();
+      renderFeedbackViews();
       updateTopbar();
       showPage(page);
     }
@@ -1009,6 +1147,13 @@
 
     function startGame(level = currentLevel) {
       if (!requireLogin()) return;
+      const banState = getBanState(currentUser);
+      if (banState.active) {
+        showToast(banState.message);
+        clearSession();
+        openMenu(homePage);
+        return;
+      }
       cancelAnimationFrame(animationId);
       currentLevel = Number(level);
       store.lastLevel = currentLevel; saveStore();
@@ -1046,7 +1191,9 @@
       const traveled = Math.max(0, (W + 180) - walls[0].x);
       progress = Math.min(100, Math.floor((traveled / totalLength) * 100));
       progressEl.textContent = progress + '%';
-      if (!levelDone && progress >= 100) {
+      const gate = getFinishGateData();
+      const touchedFinish = gate && gate.x <= player.x + 10 && Math.abs(player.y - gate.centerY) <= gate.radius + 12;
+      if (!levelDone && (touchedFinish || progress >= 100)) {
         levelDone = true;
         finishCelebration = 140;
         statusEl.textContent = 'Completing...';
@@ -1202,12 +1349,10 @@
     }
 
     function drawFinishGate() {
-      if (!walls.length) return;
-      const lastWall = walls[walls.length - 1];
-      const gateX = lastWall.x + lastWall.width + 90;
-      if (gateX < -80 || gateX > W + 200) return;
-
-      const centerY = H * 0.5;
+      const gate = getFinishGateData();
+      if (!gate) return;
+      const gateX = gate.x;
+      const centerY = gate.centerY;
       ctx.save();
       if (glowEnabled) {
         ctx.shadowBlur = 22;
@@ -1235,6 +1380,15 @@
       ctx.font = 'bold 18px Arial';
       ctx.fillText('FINISH', gateX - 35, 72);
       ctx.restore();
+    }
+
+    function getFinishGateData() {
+      if (!walls.length) return null;
+      const lastWall = walls[walls.length - 1];
+      const gateX = lastWall.x + lastWall.width + 90;
+      if (gateX < -80 || gateX > W + 200) return null;
+      const centerY = lastWall.gapY + lastWall.gapH / 2;
+      return { x: gateX, centerY, radius: Math.max(40, Math.min(70, lastWall.gapH * 0.42)) };
     }
 
     function drawPlayer() {
@@ -1361,6 +1515,8 @@
       const pass = prompt('Confirm admin password');
       if (pass === currentUser.password) {
         populateAdminUsers();
+        renderAdminUsersTable();
+        renderFeedbackViews();
         showToast('Admin panel opened');
         showPage(adminPage);
       } else if (pass !== null) {
@@ -1374,6 +1530,7 @@
     document.getElementById('continueBtn').onclick = () => startGame(store.lastLevel || 1);
     document.getElementById('levelsBtn').onclick = () => { if (!requireLogin()) return; renderLevelsGrid(); showPage(levelsPage); };
     document.getElementById('rewardsBtn').onclick = () => { if (!requireLogin()) return; renderSpinPage(); showPage(spinPage); };
+    document.getElementById('feedbackBtn').onclick = () => { if (!requireLogin()) return; renderFeedbackViews(); showPage(feedbackPage); };
     document.getElementById('aboutBtn').onclick = () => showPage(aboutPage);
 
     document.getElementById('difficultyPlayBtn').onclick = () => startGame(Number(levelSelect.value || currentLevel));
@@ -1383,24 +1540,13 @@
     document.getElementById('levelsBackBtn').onclick = () => showPage(homePage);
     document.getElementById('optionsBackBtn').onclick = () => showPage(homePage);
     document.getElementById('aboutBackBtn').onclick = () => showPage(homePage);
+    document.getElementById('feedbackBackBtn').onclick = () => showPage(homePage);
     document.getElementById('adminBackBtn').onclick = () => showPage(homePage);
     document.getElementById('adminLogoutBtn').onclick = () => {
       showToast('Admin panel closed');
       showPage(homePage);
     };
 
-    document.getElementById('add100CoinsBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      store.coins += 100; saveStore(); updateTopbar(); renderSkins(); showToast('+100 coins added');
-    };
-    document.getElementById('add500CoinsBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      store.coins += 500; saveStore(); updateTopbar(); renderSkins(); showToast('+500 coins added');
-    };
-    document.getElementById('set9999CoinsBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      store.coins = 9999; saveStore(); updateTopbar(); renderSkins(); showToast('Coins set to 9999');
-    };
     document.getElementById('unlockAllSkinsBtn').onclick = () => {
       if (!isAdmin) return showToast('Admin only');
       store.ownedSkins = skins.map(s => s.id); saveStore(); syncSkinOwnership(); updateTopbar(); renderSkins(); showToast('All skins unlocked');
@@ -1422,6 +1568,7 @@
       const username = document.getElementById('adminUserSelect').value;
       const user = users.find(u => u.username === username);
       if (!user) return;
+      if (user.username === ADMIN_USERNAME) return showToast('Protected admin account');
       user.data = normalizeStore(user.data || {});
       user.data.coins += 250;
       saveUsers();
@@ -1429,13 +1576,26 @@
         store = normalizeStore(user.data);
         updateTopbar();
       }
+      renderAdminUsersTable();
       showToast(`+250 coins to ${username}`);
+    };
+    document.getElementById('adminRemoveCoinsFromUserBtn').onclick = () => {
+      if (!isAdmin) return showToast('Admin only');
+      const username = document.getElementById('adminUserSelect').value;
+      const user = users.find(u => u.username === username);
+      if (!user) return;
+      user.data = normalizeStore(user.data || {});
+      user.data.coins = Math.max(0, user.data.coins - 250);
+      saveUsers();
+      renderAdminUsersTable();
+      showToast(`-250 coins from ${username}`);
     };
     document.getElementById('adminResetUserProgressBtn').onclick = () => {
       if (!isAdmin) return showToast('Admin only');
       const username = document.getElementById('adminUserSelect').value;
       const user = users.find(u => u.username === username);
       if (!user) return;
+      if (user.username === ADMIN_USERNAME) return showToast('Cannot reset admin account');
       user.data = defaultStore();
       saveUsers();
       if (currentUser && currentUser.username === username) {
@@ -1444,7 +1604,70 @@
         selectedSkin = store.selectedSkin;
         updateTopbar();
       }
+      renderAdminUsersTable();
       showToast(`Reset progress: ${username}`);
+    };
+    document.getElementById('banUserBtn').onclick = () => {
+      if (!isAdmin) return showToast('Admin only');
+      const username = document.getElementById('adminUserSelect').value;
+      const user = users.find(u => u.username === username);
+      if (!user || user.username === ADMIN_USERNAME) return showToast('Cannot ban this account');
+      const reason = document.getElementById('banReasonInput').value.trim() || 'Violation of game rules';
+      const duration = document.getElementById('banDurationSelect').value;
+      user.banned = {
+        active: true,
+        reason,
+        bannedAt: Date.now(),
+        until: duration === 'permanent' ? null : Date.now() + Number(duration)
+      };
+      saveUsers();
+      renderAdminUsersTable();
+      showToast(`Banned ${username}`);
+    };
+    document.getElementById('unbanUserBtn').onclick = () => {
+      if (!isAdmin) return showToast('Admin only');
+      const username = document.getElementById('adminUserSelect').value;
+      const user = users.find(u => u.username === username);
+      if (!user) return;
+      user.banned = { active: false, reason: '', until: null, bannedAt: null };
+      saveUsers();
+      renderAdminUsersTable();
+      showToast(`Unbanned ${username}`);
+    };
+    document.getElementById('adminUserSearch').oninput = () => {
+      populateAdminUsers();
+      renderAdminUsersTable();
+    };
+
+    document.getElementById('submitFeedbackBtn').onclick = () => {
+      if (!requireLogin()) return;
+      const message = document.getElementById('feedbackMessage').value.trim();
+      if (!message) return showToast('Write a message first');
+      feedbackEntries.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`,
+        username: currentUser.username,
+        type: document.getElementById('feedbackType').value,
+        message,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+      saveFeedback();
+      document.getElementById('feedbackMessage').value = '';
+      renderFeedbackViews();
+      showToast('Feedback submitted');
+    };
+    document.getElementById('feedbackFilter').onchange = renderFeedbackViews;
+    document.getElementById('feedbackUserFilter').oninput = renderFeedbackViews;
+    document.getElementById('markFeedbackReadBtn').onclick = () => {
+      if (!isAdmin) return showToast('Admin only');
+      const mode = document.getElementById('feedbackFilter').value;
+      const userFilter = document.getElementById('feedbackUserFilter').value.toLowerCase();
+      feedbackEntries.forEach(entry => {
+        if ((mode === 'all' || !entry.read) && (!userFilter || entry.username.toLowerCase().includes(userFilter))) entry.read = true;
+      });
+      saveFeedback();
+      renderFeedbackViews();
+      showToast('Marked as read');
     };
 
     document.getElementById('doSpinBtn').onclick = doDailySpin;
