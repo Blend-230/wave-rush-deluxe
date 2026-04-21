@@ -314,6 +314,14 @@
           </div>
 
           <div>
+            <div class="setting-box" id="guestAuthBox" style="max-width:560px;">
+              <div class="setting-title">Welcome Player</div>
+              <div class="setting-text">Login or register first to save progress and start playing.</div>
+              <div class="hero-actions" style="margin-top:10px;">
+                <button id="loginBtn" class="play">Login</button>
+                <button id="registerBtn" class="blue">Register</button>
+              </div>
+            </div>
             <div class="hero-actions">
               <button id="playBtn" class="play">Play Now</button>
               <button id="continueBtn">Continue</button>
@@ -326,8 +334,6 @@
               <button id="optionsBtn">Options</button>
               <button id="feedbackBtn">Feedback</button>
               <button id="aboutBtn">About</button>
-              <button id="loginBtn">Login</button>
-              <button id="registerBtn">Register</button>
               <button id="logoutBtn">Logout</button>
               <button id="adminBtn" class="danger">Admin</button>
             </div>
@@ -856,13 +862,18 @@
       currentUserLabelEl.textContent = currentUser ? currentUser.username : 'Guest';
       document.getElementById('adminBtn').style.display = isAdmin ? '' : 'none';
       document.getElementById('logoutBtn').style.display = currentUser ? '' : 'none';
-      document.getElementById('loginBtn').style.display = currentUser ? 'none' : '';
-      document.getElementById('registerBtn').style.display = currentUser ? 'none' : '';
+      document.getElementById('guestAuthBox').style.display = currentUser ? 'none' : '';
       document.getElementById('feedbackBtn').style.display = currentUser ? '' : 'none';
+      document.getElementById('continueBtn').style.display = currentUser ? '' : 'none';
+      document.getElementById('levelsBtn').style.display = currentUser ? '' : 'none';
+      document.getElementById('playBtn').textContent = currentUser ? 'Play Now' : 'Quick Demo';
       refreshLevelSelectAccess();
     }
 
     function showToast(msg) {
+      if (showToast._last === msg && Date.now() - (showToast._at || 0) < 900) return;
+      showToast._last = msg;
+      showToast._at = Date.now();
       toastEl.textContent = msg;
       toastEl.classList.add('show');
       clearTimeout(showToast._t);
@@ -900,8 +911,10 @@
     function submitAuth() {
       const username = authUsername.value.trim();
       const password = authPassword.value;
-      if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) return showToast('Use 3-16 letters/numbers/_');
-      if (password.length < 4) return showToast('Password too short');
+      if (!username) return showToast('Please enter username');
+      if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) return showToast('Username: 3-16 letters, numbers, or _');
+      if (!password) return showToast('Please enter password');
+      if (password.length < 4) return showToast('Password must be at least 4 characters');
       if (authMode === 'login') {
         const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
         if (!user || user.password !== password) return showToast('Invalid credentials');
@@ -1076,9 +1089,11 @@
       document.getElementById('doSpinBtn').disabled = getTimeUntilNextSpin() > 0;
     }
 
-    setInterval(() => {
+    function spinTick() {
       if (!spinPage.classList.contains('hidden')) renderSpinPage();
-    }, 1000);
+      setTimeout(spinTick, 1000);
+    }
+    spinTick();
 
     let spinning = false;
     function doDailySpin() {
@@ -1292,6 +1307,8 @@
     }
     function updateSparkles() {
       if (!lowPerfMode || frame % 2 === 0) createSpark();
+      const maxSparkles = lowPerfMode ? 120 : 220;
+      if (sparkles.length > maxSparkles) sparkles.splice(0, sparkles.length - maxSparkles);
       for (let i = sparkles.length - 1; i >= 0; i--) {
         const s = sparkles[i];
         s.x += s.dx;
@@ -1353,6 +1370,7 @@
     }
 
     function drawGrid() {
+      if (lowPerfMode && frame % 2 !== 0) return;
       ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; const off = (frame * 0.7) % 26;
       for (let x = -26; x < W + 26; x += 26) { ctx.beginPath(); ctx.moveTo(x - off, 0); ctx.lineTo(x - off, H); ctx.stroke(); }
       for (let y = 0; y < H; y += 26) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
