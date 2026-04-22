@@ -915,13 +915,14 @@
 
     function submitAuth() {
       const username = authUsername.value.trim();
+      const usernameLower = username.toLowerCase();
       const password = authPassword.value;
       if (!username) return showToast('Please enter username');
       if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) return showToast('Username: 3-16 letters, numbers, or _');
       if (!password) return showToast('Please enter password');
       if (password.length < 4) return showToast('Password must be at least 4 characters');
       if (authMode === 'login') {
-        const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+        const user = users.find(u => u.username.toLowerCase() === usernameLower);
         if (!user || user.password !== password) return showToast('Invalid credentials');
         const banState = getBanState(user);
         if (banState.active) return showToast(banState.message);
@@ -933,7 +934,7 @@
         showToast(`Welcome ${user.username}!`);
         return;
       }
-      if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) return showToast('Username already exists');
+      if (users.some(u => u.username.toLowerCase() === usernameLower)) return showToast('Username already exists');
       users.push(ensureUserShape({ username, password, isAdmin: false, data: defaultStore() }));
       saveUsers();
       setCurrentUser(username);
