@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Wave Rush Deluxe</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, Arial, sans-serif; }
@@ -12,7 +12,8 @@
 
     .topbar {
       position: fixed; top: 14px; left: 14px; right: 14px; z-index: 40;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; pointer-events: none;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      pointer-events: none;
     }
 
     .glass {
@@ -36,11 +37,16 @@
     }
 
     button {
-      color: white; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.10);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.22); transition: transform .15s ease, background .15s ease, opacity .15s ease;
+      color: white;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+      transition: transform .15s ease, background .15s ease, opacity .15s ease;
     }
-    button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.17); }
+
+    button:hover:not(:disabled) { transform: translateY(-2px); background: rgba(255,255,255,0.17); }
     button:disabled { opacity: .55; cursor: not-allowed; }
+
     .play { background: linear-gradient(90deg, #fde047, #f59e0b); color: #111827; }
     .blue { background: rgba(59,130,246,.28); }
     .purple { background: rgba(168,85,247,.28); }
@@ -48,31 +54,35 @@
     .danger { background: rgba(239,68,68,.28); }
 
     .screen {
-      position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 20px;
+      position: fixed; inset: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
       background: radial-gradient(circle at 20% 30%, rgba(255,220,110,.08), transparent 20%), rgba(3,2,10,.18);
     }
 
     .hidden { display: none !important; }
 
     .panel {
-      width: min(1060px, 96vw); max-height: 92vh; overflow: auto; border-radius: 30px;
-      background: rgba(9, 7, 24, 0.62); border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 20px 70px rgba(0,0,0,0.5); backdrop-filter: blur(20px);
+      width: min(1060px, 96vw);
+      max-height: 92vh;
+      overflow: auto;
+      border-radius: 30px;
+      background: rgba(9, 7, 24, 0.62);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.5);
+      backdrop-filter: blur(20px);
     }
 
     .page { padding: 28px; }
-
-    .hero {
-      display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; min-height: 620px;
-    }
-
+    .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; min-height: 620px; }
     .hero-left { display: flex; flex-direction: column; justify-content: space-between; gap: 20px; }
     .hero-title { font-size: clamp(2.4rem, 6vw, 5.5rem); line-height: .92; font-weight: 900; text-shadow: 0 0 18px rgba(255,255,255,.2); }
     .hero-sub { color: #efe9ff; line-height: 1.7; font-size: 1.04rem; max-width: 620px; margin-top: 14px; }
-
     .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
     .chip {
-      padding: 10px 14px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
       color: #f5f3ff; font-weight: 700; font-size: .95rem;
     }
 
@@ -81,13 +91,16 @@
 
     .preview {
       position: relative; border-radius: 26px; overflow: hidden; min-height: 100%;
-      border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(180deg, #2a045b 0%, #741bd3 45%, #230547 100%);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, #2a045b 0%, #741bd3 45%, #230547 100%);
       padding: 18px;
     }
 
     .preview::before {
-      content: ""; position: absolute; inset: 0;
-      background: radial-gradient(circle at 20% 34%, rgba(255,232,110,0.46), transparent 24%), radial-gradient(circle at 85% 18%, rgba(255,255,255,0.12), transparent 18%);
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 20% 34%, rgba(255,232,110,0.46), transparent 24%),
+                  radial-gradient(circle at 85% 18%, rgba(255,255,255,0.12), transparent 18%);
       pointer-events: none;
     }
 
@@ -97,31 +110,46 @@
     .preview-value { margin-top: 4px; font-size: 1.05rem; font-weight: 800; }
 
     .mini-scene {
-      position: relative; z-index: 1; margin-top: 18px; min-height: 320px; border-radius: 20px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(180deg, #28024d 0%, #6f1dcb 46%, #1a0437 100%);
+      position: relative; z-index: 1; margin-top: 18px; min-height: 320px;
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, #28024d 0%, #6f1dcb 46%, #1a0437 100%);
     }
 
     .mini-wall, .mini-wall-bottom {
-      position: absolute; background: rgba(36, 10, 62, 0.94); border: 3px solid white; box-shadow: 0 0 18px rgba(255,255,255,.36);
+      position: absolute; background: rgba(36, 10, 62, 0.94);
+      border: 3px solid white; box-shadow: 0 0 18px rgba(255,255,255,.36);
     }
+
     .mini-wall { clip-path: polygon(0 100%, 0 18%, 16% 0, 32% 18%, 48% 0, 64% 18%, 80% 0, 100% 18%, 100% 100%); }
     .mini-wall-bottom { clip-path: polygon(0 0, 0 82%, 16% 100%, 32% 82%, 48% 100%, 64% 82%, 80% 100%, 100% 82%, 100% 0); }
     .mini-wave {
-      position: absolute; left: 12%; top: 56%; width: 46%; height: 24%;
-      border-left: 10px solid #fff6a0; border-bottom: 10px solid #fff6a0; transform: skewX(-28deg) rotate(-9deg);
+      position: absolute; left: 12%; top: 56%;
+      width: 46%; height: 24%;
+      border-left: 10px solid #fff6a0;
+      border-bottom: 10px solid #fff6a0;
+      transform: skewX(-28deg) rotate(-9deg);
       filter: drop-shadow(0 0 10px #fff06a) drop-shadow(0 0 16px #fff06a);
     }
+
     .mini-arrow {
-      position: absolute; right: 32%; top: 42%; width: 40px; height: 26px;
-      background: #f6d94e; clip-path: polygon(0 50%, 55% 0, 100% 50%, 55% 100%); transform: rotate(-25deg);
+      position: absolute; right: 32%; top: 42%;
+      width: 40px; height: 26px;
+      background: #f6d94e;
+      clip-path: polygon(0 50%, 55% 0, 100% 50%, 55% 100%);
+      transform: rotate(-25deg);
       box-shadow: 0 0 18px rgba(255,234,90,.85);
     }
 
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
     .card {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px;
+      padding: 16px;
       transition: transform .15s ease, border-color .15s ease, background .15s ease;
     }
+
     .card:hover { transform: translateY(-2px); }
     .selectable { cursor: pointer; }
     .selected { border-color: #fde68a !important; box-shadow: 0 0 0 2px rgba(253,230,138,.18); background: rgba(255,255,255,0.14); }
@@ -130,8 +158,10 @@
     .price { margin-top: 10px; color: #fde68a; font-weight: 800; }
 
     .skin-preview {
-      width: 66px; height: 66px; border-radius: 18px; border: 2px solid rgba(255,255,255,.18);
-      box-shadow: 0 0 18px rgba(255,255,255,.12); margin-bottom: 12px;
+      width: 66px; height: 66px; border-radius: 18px;
+      border: 2px solid rgba(255,255,255,.18);
+      box-shadow: 0 0 18px rgba(255,255,255,.12);
+      margin-bottom: 12px;
     }
 
     .section-title { font-size: 2rem; font-weight: 900; }
@@ -140,119 +170,64 @@
     .spin-wheel-wrap { display: grid; grid-template-columns: 320px 1fr; gap: 18px; align-items: center; }
     .wheel-area { display: flex; align-items: center; justify-content: center; }
     .wheel-pointer {
-      position: absolute; width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 26px solid #fde68a;
-      transform: translateY(-170px); filter: drop-shadow(0 0 8px rgba(253,230,138,.6));
+      position: absolute; width: 0; height: 0;
+      border-left: 16px solid transparent; border-right: 16px solid transparent;
+      border-top: 26px solid #fde68a; transform: translateY(-170px);
+      filter: drop-shadow(0 0 8px rgba(253,230,138,.6));
     }
+
     .wheel {
-      width: 280px; height: 280px; border-radius: 50%; border: 6px solid rgba(255,255,255,.75); box-shadow: 0 0 20px rgba(255,255,255,.18);
-      position: relative; transition: transform 4.2s cubic-bezier(.18,.88,.16,1); background: conic-gradient(
-        #fde047 0deg 60deg,
-        #60a5fa 60deg 120deg,
-        #a78bfa 120deg 180deg,
-        #34d399 180deg 240deg,
-        #fb7185 240deg 300deg,
-        #f59e0b 300deg 360deg
-      );
+      width: 280px; height: 280px; border-radius: 50%;
+      border: 6px solid rgba(255,255,255,.75);
+      box-shadow: 0 0 20px rgba(255,255,255,.18);
+      position: relative;
+      transition: transform 4.2s cubic-bezier(.18,.88,.16,1);
+      background: conic-gradient(#fde047 0deg 60deg, #60a5fa 60deg 120deg, #a78bfa 120deg 180deg, #34d399 180deg 240deg, #fb7185 240deg 300deg, #f59e0b 300deg 360deg);
       overflow: hidden;
     }
+
     .wheel::after {
-      content: ''; position: absolute; inset: 28px; border-radius: 50%; background: rgba(12,9,28,.86); border: 2px solid rgba(255,255,255,.15);
+      content: '';
+      position: absolute; inset: 28px; border-radius: 50%;
+      background: rgba(12,9,28,.86);
+      border: 2px solid rgba(255,255,255,.15);
     }
+
     .wheel-center {
-      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; font-weight: 900; font-size: 1.2rem;
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2; font-weight: 900; font-size: 1.2rem;
     }
 
     .settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
-    .setting-box { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 16px; }
-    .setting-title { font-weight: 800; }
-    .setting-text { color: #ddd6fe; margin-top: 8px; line-height: 1.55; }
-    .range-row { margin-top: 14px; display: flex; gap: 12px; align-items: center; }
-    .range-row span { min-width: 38px; text-align: right; font-weight: 800; }
-    .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .92rem; }
-    .admin-table th, .admin-table td { border-bottom: 1px solid rgba(255,255,255,.14); padding: 8px; text-align: left; }
-    .admin-table th { color: #fde68a; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; }
-    .pill { padding: 4px 8px; border-radius: 999px; font-size: .75rem; font-weight: 800; display: inline-block; }
-    .pill.ok { background: rgba(34,197,94,.24); }
-    .pill.warn { background: rgba(251,191,36,.24); }
-    .pill.danger { background: rgba(239,68,68,.25); }
-    textarea, input[type="text"] {
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      color: #fff;
-      padding: 10px 12px;
-      font-size: .95rem;
+    .setting-box {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      padding: 16px;
     }
 
+    .setting-title { font-weight: 800; }
+    .setting-text { color: #ddd6fe; margin-top: 8px; line-height: 1.55; }
+
+    .range-row { margin-top: 14px; display: flex; gap: 12px; align-items: center; }
+    .range-row span { min-width: 38px; text-align: right; font-weight: 800; }
+
     .toast {
-      position: fixed; top: 92px; right: 20px; z-index: 60; padding: 14px 16px; border-radius: 16px;
-      background: rgba(10, 8, 28, 0.9); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 14px 34px rgba(0,0,0,0.38);
-      opacity: 0; transform: translateY(-12px); transition: .24s ease; pointer-events: none;
+      position: fixed; top: 92px; right: 20px; z-index: 60;
+      padding: 14px 16px; border-radius: 16px;
+      background: rgba(10, 8, 28, 0.9);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.38);
+      opacity: 0; transform: translateY(-12px);
+      transition: .24s ease; pointer-events: none;
     }
+
     .toast.show { opacity: 1; transform: translateY(0); }
 
     .bottom-controls {
-      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 20; flex-wrap: wrap;
-    }
-
-    .finish-screen {
-      position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center;
-      background: radial-gradient(circle at 50% 32%, rgba(253, 224, 71, 0.2), rgba(4, 2, 15, 0.88) 58%);
-      padding: 22px;
-    }
-    .finish-card {
-      width: min(680px, 94vw);
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,.2);
-      background: linear-gradient(170deg, rgba(44, 10, 82, 0.9), rgba(13, 8, 36, 0.95));
-      box-shadow: 0 30px 80px rgba(0,0,0,.52), 0 0 40px rgba(253, 230, 138, 0.12);
-      backdrop-filter: blur(16px);
-      padding: 30px;
-      text-align: center;
-      animation: finishIn .42s cubic-bezier(.2,.9,.2,1);
-    }
-    .finish-eyebrow {
-      color: #fde68a;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-size: 12px;
-      font-weight: 900;
-    }
-    .finish-title {
-      margin-top: 12px;
-      font-size: clamp(1.9rem, 4vw, 3rem);
-      font-weight: 900;
-      text-shadow: 0 0 20px rgba(255,255,255,.18);
-    }
-    .finish-subtitle {
-      margin-top: 12px;
-      line-height: 1.6;
-      color: #e9ddff;
-      font-size: 1.02rem;
-    }
-    .finish-stats {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
-    }
-    .finish-stat {
-      background: rgba(255,255,255,0.09);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 14px;
-      padding: 10px 12px;
-    }
-    .finish-actions {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    @keyframes finishIn {
-      from { opacity: 0; transform: translateY(18px) scale(.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 10px; z-index: 20; flex-wrap: wrap;
     }
 
     @media (max-width: 940px) {
@@ -272,7 +247,6 @@
       <div class="stat"><div class="label">Best</div><div class="value" id="best">1</div></div>
       <div class="stat"><div class="label">Difficulty</div><div class="value" id="mode">Easy</div></div>
       <div class="stat"><div class="label">Status</div><div class="value" id="status">Menu</div></div>
-      <div class="stat"><div class="label">User</div><div class="value" id="currentUserLabel">Guest</div></div>
     </div>
 
     <div class="glass quick-actions">
@@ -289,8 +263,10 @@
           <div>
             <div class="hero-title">WAVE RUSH<br>DELUXE</div>
             <div class="hero-sub">
-              Një web game ma clean, ma funny dhe ma addicting. Futu n’wave tunnel, zgjidhe difficulty, fito coins, blej skins dhe provo daily spin. UI është ma e lehtë për përdorim dhe menuja të çon direkt aty ku duhet.
+              Një web game ma clean, ma funny dhe ma addicting. Futu n'wave tunnel,
+              zgjidhe difficulty, fito coins, blej skins dhe provo daily spin.
             </div>
+
             <div class="chips">
               <div class="chip">Funny vibe 😎</div>
               <div class="chip">50 levels ⚡</div>
@@ -308,15 +284,12 @@
               <button id="spinBtn" class="blue">Daily Spin</button>
               <button id="optionsBtn">Options</button>
             </div>
+
             <div class="small-actions">
               <button id="continueBtn">Continue</button>
               <button id="levelsBtn">Levels</button>
               <button id="rewardsBtn">Rewards</button>
-              <button id="feedbackBtn">Feedback</button>
               <button id="aboutBtn">About</button>
-              <button id="loginBtn">Login</button>
-              <button id="registerBtn">Register</button>
-              <button id="logoutBtn">Logout</button>
               <button id="adminBtn" class="danger">Admin</button>
             </div>
           </div>
@@ -343,16 +316,19 @@
           </div>
 
           <div class="card-text" style="position:relative;z-index:1;margin-top:16px;">
-            “Warning: mundesh me than veç edhe 1 level… edhe me lujt 20 tjera.”
+            "Warning: mundesh me than veç edhe 1 level… edhe me lujt 20 tjera."
           </div>
         </div>
       </div>
 
       <div class="page hidden" id="difficultyPage">
         <div class="section-title">Choose Difficulty</div>
-        <div class="section-sub">Easy për casual players, Hard për balancë, Extreme për sweat mode dhe Insane për ata që s’kan frikë.</div>
+        <div class="section-sub">Easy për casual players, Hard për balancë, Extreme për sweat mode dhe Insane për ata që s'kan frikë.</div>
         <div class="cards" id="difficultyList"></div>
-        <div class="small-actions"><button id="difficultyPlayBtn" class="play">Play With Selected Difficulty</button><button id="difficultyBackBtn">Back</button></div>
+        <div class="small-actions">
+          <button id="difficultyPlayBtn" class="play">Play With Selected Difficulty</button>
+          <button id="difficultyBackBtn">Back</button>
+        </div>
       </div>
 
       <div class="page hidden" id="skinsPage">
@@ -361,26 +337,38 @@
             <div class="section-title">Skins Shop</div>
             <div class="section-sub">Blej skins me coins. Disa janë funny, disa clean, disa op-looking.</div>
           </div>
-          <div class="glass" style="padding:12px 16px;"><div class="label">Your Coins</div><div class="value" id="shopCoins">0</div></div>
+          <div class="glass" style="padding:12px 16px;">
+            <div class="label">Your Coins</div>
+            <div class="value" id="shopCoins">0</div>
+          </div>
         </div>
         <div class="cards" id="skinsGrid"></div>
-        <div class="small-actions"><button id="skinsBackBtn">Back</button></div>
+        <div class="small-actions">
+          <button id="skinsBackBtn">Back</button>
+        </div>
       </div>
 
       <div class="page hidden" id="spinPage">
         <div class="section-title">Daily Spin</div>
-        <div class="section-sub">Një spin çdo 24 orë. Mundesh me fitu coins ose skin të rrallë. S’po t’premtoj fat, po shpresojmë. 😄</div>
+        <div class="section-sub">Një spin çdo 24 orë. Mundesh me fitu coins ose skin të rrallë.</div>
+
         <div class="spin-wheel-wrap">
           <div class="wheel-area">
             <div style="position:relative;display:flex;align-items:center;justify-content:center;">
               <div class="wheel-pointer"></div>
-              <div class="wheel" id="spinWheel"><div class="wheel-center">SPIN</div></div>
+              <div class="wheel" id="spinWheel">
+                <div class="wheel-center">SPIN</div>
+              </div>
             </div>
           </div>
+
           <div>
             <div class="cards" id="spinRewardsPreview"></div>
             <div class="small-actions" style="margin-top:18px;">
-              <div class="glass" style="padding:12px 16px;"><div class="label">Next Spin</div><div class="value" id="spinTimer">Ready</div></div>
+              <div class="glass" style="padding:12px 16px;">
+                <div class="label">Next Spin</div>
+                <div class="value" id="spinTimer">Ready</div>
+              </div>
               <button class="play" id="doSpinBtn">Spin Now</button>
               <button id="spinBackBtn">Back</button>
             </div>
@@ -390,923 +378,1143 @@
 
       <div class="page hidden" id="levelsPage">
         <div class="section-title">Choose Level</div>
-        <div class="section-sub">50 nivele. Qe s’do me e nis gjithmonë prej fillimit, qitu i zgjedh direkt.</div>
+        <div class="section-sub">50 nivele. Qitu i zgjedh direkt.</div>
         <div class="row" style="align-items:center; margin-bottom:18px;">
           <select id="levelSelect"></select>
           <button id="playChosenLevelBtn" class="play">Play Selected Level</button>
         </div>
         <div class="cards" id="levelsPreviewGrid"></div>
-        <div class="small-actions"><button id="levelsBackBtn">Back</button></div>
+        <div class="small-actions">
+          <button id="levelsBackBtn">Back</button>
+        </div>
       </div>
 
       <div class="page hidden" id="optionsPage">
         <div class="section-title">Options</div>
-        <div class="section-sub">Lehtë për përdorim. Ndrysho veç ato që kanë vërtet rëndësi.</div>
+        <div class="section-sub">Lehtë për përdorim. Ndrysho veç ato që kanë rëndësi.</div>
         <div class="settings">
           <div class="setting-box">
             <div class="setting-title">Glow Effects</div>
             <div class="setting-text">Aktivizo ose çaktivizo dritat neon.</div>
             <div class="small-actions"><button id="toggleGlowBtn">Toggle Glow</button></div>
           </div>
+
           <div class="setting-box">
             <div class="setting-title">Funny Messages</div>
             <div class="setting-text">Mesazhe të vogla funny pas win/lose.</div>
             <div class="small-actions"><button id="toggleFunnyBtn">Toggle Funny Text</button></div>
           </div>
+
           <div class="setting-box">
             <div class="setting-title">Volume</div>
             <div class="setting-text">Placeholder slider për audio future update.</div>
-            <div class="range-row"><input id="volumeRange" type="range" min="0" max="100" value="70"><span id="volumeValue">70</span></div>
+            <div class="range-row">
+              <input id="volumeRange" type="range" min="0" max="100" value="70">
+              <span id="volumeValue">70</span>
+            </div>
           </div>
+
           <div class="setting-box">
             <div class="setting-title">Reset Save</div>
             <div class="setting-text">Fshin progressin lokal.</div>
             <div class="small-actions"><button id="resetSaveBtn" class="danger">Reset Save</button></div>
           </div>
         </div>
-        <div class="small-actions"><button id="optionsBackBtn">Back</button></div>
+
+        <div class="small-actions">
+          <button id="optionsBackBtn">Back</button>
+        </div>
       </div>
 
       <div class="page hidden" id="aboutPage">
         <div class="section-title">About</div>
-        <div class="section-sub">Ky version është mendu me qenë ma i lehtë për përdorim në web, ma i pastër vizualisht dhe me reward loop ma tërheqës për players.</div>
+        <div class="section-sub">Ky version është mendu me qenë ma i lehtë për përdorim në web, ma i pastër vizualisht dhe me reward loop ma tërheqës.</div>
         <div class="cards">
-          <div class="card"><div class="card-title">Quick Sessions</div><div class="card-text">Hyn shpejt, klikon play, luan menjëherë.</div></div>
-          <div class="card"><div class="card-title">Retention Loop</div><div class="card-text">Coins, skins, daily spin, level chasing.</div></div>
-          <div class="card"><div class="card-title">Funny Feel</div><div class="card-text">Mesazhe dhe vibe ma chill që i tërheqin players.</div></div>
+          <div class="card">
+            <div class="card-title">Quick Sessions</div>
+            <div class="card-text">Hyn shpejt, klikon play, luan menjëherë.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Retention Loop</div>
+            <div class="card-text">Coins, skins, daily spin, level chasing.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Funny Feel</div>
+            <div class="card-text">Mesazhe dhe vibe ma chill që i tërheqin players.</div>
+          </div>
         </div>
         <div class="small-actions"><button id="aboutBackBtn">Back</button></div>
       </div>
 
-      <div class="page hidden" id="feedbackPage">
-        <div class="section-title">Feedback & Support</div>
-        <div class="section-sub">Send comments, bug reports, gameplay feedback, or help requests linked to your account.</div>
-        <div class="settings">
+      <div class="page hidden" id="adminPage">
+        <div class="section-title">Admin Panel</div>
+        <div class="section-sub">Kur ta lidhësh me Firebase, admini mundet me i pa users, kush është online/offline, me shtu coins, unlock levels, reset daily spin dhe ban/unban.</div>
+
+        <div class="admin-toolbar">
           <div class="setting-box">
-            <div class="setting-title">New Submission</div>
-            <div class="small-actions">
-              <select id="feedbackType">
-                <option>Comment</option>
-                <option>Bug Report</option>
-                <option>Gameplay Feedback</option>
-                <option>Help Request</option>
-              </select>
+            <div class="setting-title">Firebase Status</div>
+            <div class="setting-text admin-note">Qitu lidhet loja me Firestore. Pa Firebase, admin paneli punon vetëm lokalisht për userin aktual.</div>
+            <div class="firebase-warning" id="firebaseStatusBox">Firebase s'është konfiguru ende. Plotëso firebaseConfig në kod.</div>
+            <div class="small-actions" style="margin-top:12px;">
+              <button id="refreshUsersBtn" class="blue">Refresh Users</button>
+              <button id="forceSyncBtn" class="purple">Sync My User</button>
             </div>
-            <div style="margin-top:10px;"><textarea id="feedbackMessage" rows="5" placeholder="Write your message here..."></textarea></div>
-            <div class="small-actions"><button id="submitFeedbackBtn" class="play">Submit Feedback</button></div>
           </div>
+
           <div class="setting-box">
-            <div class="setting-title">My Recent Submissions</div>
-            <div id="myFeedbackList" class="card-text">No submissions yet.</div>
+            <div class="setting-title">Current User Quick Tools</div>
+            <div class="setting-text">Këto butona vlejnë për userin aktual edhe pa Firebase.</div>
+            <div class="small-actions">
+              <button id="add100CoinsBtn" class="green">+100 Coins</button>
+              <button id="add500CoinsBtn" class="green">+500 Coins</button>
+              <button id="set9999CoinsBtn" class="purple">Set 9999</button>
+              <button id="unlockAllSkinsBtn" class="purple">Unlock All Skins</button>
+              <button id="resetSpinBtn" class="blue">Reset Daily Spin</button>
+              <button id="unlockAllLevelsBtn" class="green">Unlock All 50</button>
+            </div>
           </div>
         </div>
-        <div class="small-actions"><button id="feedbackBackBtn">Back</button></div>
-      </div>
 
-      <div class="page hidden" id="adminPage">
-        <div class="section-title">Admin Dashboard</div>
-        <div class="section-sub">Only the real admin account can use this panel. Manage users, bans, and feedback safely.</div>
         <div class="settings">
           <div class="setting-box">
-            <div class="setting-title">User Moderation</div>
-            <div class="small-actions">
-              <input type="text" id="adminUserSearch" placeholder="Search username...">
-              <select id="adminUserSelect"></select>
-              <button id="adminAddCoinsToUserBtn" class="green">+250 Coins</button>
-              <button id="adminRemoveCoinsFromUserBtn" class="danger">-250 Coins</button>
-              <button id="adminResetUserProgressBtn" class="danger">Reset Progress</button>
-              <select id="banDurationSelect">
-                <option value="86400000">Ban 1 Day</option>
-                <option value="604800000">Ban 1 Week</option>
-                <option value="2629800000">Ban 1 Month</option>
-                <option value="31557600000">Ban 1 Year</option>
-                <option value="permanent">Ban Permanent</option>
-              </select>
-              <input type="text" id="banReasonInput" placeholder="Ban reason...">
-              <button id="banUserBtn" class="danger">Ban User</button>
-              <button id="unbanUserBtn" class="green">Unban User</button>
-            </div>
-            <table class="admin-table">
-              <thead><tr><th>User</th><th>Created</th><th>Last Login</th><th>Progress</th><th>Coins</th><th>Status</th></tr></thead>
-              <tbody id="adminUsersTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="setting-box">
-            <div class="setting-title">Feedback Inbox</div>
-            <div class="small-actions">
-              <select id="feedbackFilter">
-                <option value="unread">Unread</option>
-                <option value="all">All</option>
-              </select>
-              <input type="text" id="feedbackUserFilter" placeholder="Filter by username...">
-              <button id="markFeedbackReadBtn" class="blue">Mark Visible as Read</button>
-            </div>
-            <table class="admin-table">
-              <thead><tr><th>User</th><th>Type</th><th>Date</th><th>Status</th><th>Message</th></tr></thead>
-              <tbody id="adminFeedbackTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="setting-box">
-            <div class="setting-title">Game Controls</div>
+            <div class="setting-title">Level Control</div>
+            <div class="setting-text">Ndrysho levelin që don me testu ose hape krejt nivelet.</div>
             <div class="small-actions">
               <select id="adminLevelSelect"></select>
               <button id="setAdminLevelBtn" class="play">Set Current Level</button>
-              <button id="unlockAllLevelsBtn" class="green">Unlock All 50</button>
-              <button id="unlockAllSkinsBtn" class="purple">Unlock All Skins</button>
-              <button id="resetSpinBtn" class="blue">Reset Daily Spin</button>
             </div>
+          </div>
+
+          <div class="setting-box">
+            <div class="setting-title">Maintenance</div>
+            <div class="setting-text">Reset save ose dil nga admin mode.</div>
             <div class="small-actions">
               <button id="adminBackBtn">Back</button>
               <button id="adminLogoutBtn" class="danger">Exit Admin</button>
             </div>
           </div>
         </div>
+
+        <div class="admin-users-wrap">
+          <div class="admin-users-header">
+            <div>
+              <div class="section-title" style="font-size:1.5rem;">Users</div>
+              <div class="section-sub" style="margin-bottom:0;">Online/offline status, coins, best level, last seen, ban/unban dhe admin actions.</div>
+            </div>
+            <div class="glass" style="padding:12px 16px; min-width:180px;">
+              <div class="label">Users Found</div>
+              <div class="value" id="usersCount">0</div>
+            </div>
+          </div>
+          <div id="adminUsersGrid" class="admin-users-grid"></div>
+        </div>
       </div>
+
     </div>
   </div>
 
   <div class="bottom-controls hidden" id="gameControls">
     <button id="restartBtn" class="green">Restart</button>
-    <button id="nextLevelBtn" class="play hidden">Next Level</button>
   </div>
 
   <div class="toast" id="toast"></div>
 
-  <div class="finish-screen hidden" id="finishScreen">
-    <div class="finish-card">
-      <div class="finish-eyebrow" id="finishEyebrow">Level Complete</div>
-      <div class="finish-title" id="finishTitle">Great Run!</div>
-      <div class="finish-subtitle" id="finishSubtitle">You cleared the tunnel. Choose what to do next.</div>
-      <div class="finish-stats">
-        <div class="finish-stat"><div class="label">Level</div><div class="value" id="finishLevel">1</div></div>
-        <div class="finish-stat"><div class="label">Reward</div><div class="value" id="finishReward">+0</div></div>
-        <div class="finish-stat"><div class="label">Unlocked</div><div class="value" id="finishUnlocked">1</div></div>
-      </div>
-      <div class="finish-actions">
-        <button id="finishNextBtn" class="play">Next Level</button>
-        <button id="finishRestartBtn" class="green">Restart</button>
-        <button id="finishMenuBtn" class="purple">Back to Menu</button>
-      </div>
-    </div>
-  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    "use strict";
 
-    const coinsEl = document.getElementById('coins');
-    const levelEl = document.getElementById('level');
-    const progressEl = document.getElementById('progress');
-    const bestEl = document.getElementById('best');
-    const modeEl = document.getElementById('mode');
-    const statusEl = document.getElementById('status');
-    const currentUserLabelEl = document.getElementById('currentUserLabel');
-    const shopCoinsEl = document.getElementById('shopCoins');
-    const spinTimerEl = document.getElementById('spinTimer');
-    const selectedDifficultyPreviewEl = document.getElementById('selectedDifficultyPreview');
-    const selectedSkinPreviewEl = document.getElementById('selectedSkinPreview');
-    const toastEl = document.getElementById('toast');
-    const menuScreen = document.getElementById('menuScreen');
-    const gameControls = document.getElementById('gameControls');
-    const levelSelect = document.getElementById('levelSelect');
-    const levelsPreviewGrid = document.getElementById('levelsPreviewGrid');
-    const spinWheel = document.getElementById('spinWheel');
-    const finishScreen = document.getElementById('finishScreen');
-    const finishEyebrowEl = document.getElementById('finishEyebrow');
-    const finishTitleEl = document.getElementById('finishTitle');
-    const finishSubtitleEl = document.getElementById('finishSubtitle');
-    const finishLevelEl = document.getElementById('finishLevel');
-    const finishRewardEl = document.getElementById('finishReward');
-    const finishUnlockedEl = document.getElementById('finishUnlocked');
-    const finishNextBtn = document.getElementById('finishNextBtn');
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d", { alpha: false });
 
-    const homePage = document.getElementById('homePage');
-    const difficultyPage = document.getElementById('difficultyPage');
-    const skinsPage = document.getElementById('skinsPage');
-    const spinPage = document.getElementById('spinPage');
-    const levelsPage = document.getElementById('levelsPage');
-    const optionsPage = document.getElementById('optionsPage');
-    const aboutPage = document.getElementById('aboutPage');
-    const feedbackPage = document.getElementById('feedbackPage');
-    const adminPage = document.getElementById('adminPage');
-
-    const difficultyList = document.getElementById('difficultyList');
-    const skinsGrid = document.getElementById('skinsGrid');
-    const spinRewardsPreview = document.getElementById('spinRewardsPreview');
+    const coinsEl = document.getElementById("coins");
+    const levelEl = document.getElementById("level");
+    const progressEl = document.getElementById("progress");
+    const bestEl = document.getElementById("best");
+    const modeEl = document.getElementById("mode");
+    const statusEl = document.getElementById("status");
+    const shopCoinsEl = document.getElementById("shopCoins");
+    const spinTimerEl = document.getElementById("spinTimer");
+    const difficultyPreviewEl = document.getElementById("selectedDifficultyPreview");
+    const skinPreviewEl = document.getElementById("selectedSkinPreview");
+    const toastEl = document.getElementById("toast");
+    const menuScreen = document.getElementById("menuScreen");
+    const gameControls = document.getElementById("gameControls");
+    const levelSelect = document.getElementById("levelSelect");
+    const levelsPreviewGrid = document.getElementById("levelsPreviewGrid");
+    const spinWheel = document.getElementById("spinWheel");
+    const homePage = document.getElementById("homePage");
+    const difficultyPage = document.getElementById("difficultyPage");
+    const skinsPage = document.getElementById("skinsPage");
+    const spinPage = document.getElementById("spinPage");
+    const levelsPage = document.getElementById("levelsPage");
+    const optionsPage = document.getElementById("optionsPage");
+    const aboutPage = document.getElementById("aboutPage");
+    const adminPage = document.getElementById("adminPage");
+    const difficultyList = document.getElementById("difficultyList");
+    const skinsGrid = document.getElementById("skinsGrid");
+    const spinRewardsPreview = document.getElementById("spinRewardsPreview");
 
     const difficulties = {
-      Easy: { gapBonus: 30, speedMul: 0.88, jitterMul: 0.84, desc: 'Relax mode. Ma falës, ma chill.' },
-      Hard: { gapBonus: 0, speedMul: 1.0, jitterMul: 1.0, desc: 'Balanced. Qajo që shumica e duan.' },
-      Extreme: { gapBonus: -18, speedMul: 1.12, jitterMul: 1.14, desc: 'For sweaty fingers only.' },
-      Insane: { gapBonus: -34, speedMul: 1.24, jitterMul: 1.28, desc: 'Controller throwing simulator.' }
+      Easy:    { gapBonus: 30, speedMult: 0.88, jitterMult: 0.84, desc: "Relax mode. Ma falës, ma chill." },
+      Hard:    { gapBonus: 0,  speedMult: 1.00, jitterMult: 1.00, desc: "Balanced. Qajo që shumica e duan." },
+      Extreme: { gapBonus: -18, speedMult: 1.12, jitterMult: 1.14, desc: "For sweaty fingers only." },
+      Insane:  { gapBonus: -34, speedMult: 1.24, jitterMult: 1.28, desc: "Controller throwing simulator." }
     };
 
     const skins = [
-      { id: 'starter', name: 'Starter', price: 0, colors: ['#fff5ae', '#ffd84d', '#ff9a00'], desc: 'Classic clean arrow.' },
-      { id: 'ice', name: 'Ice Bolt', price: 180, colors: ['#dff7ff', '#88e1ff', '#2bbcff'], desc: 'Cold look. Very clean.' },
-      { id: 'plasma', name: 'Plasma Pop', price: 280, colors: ['#ffd6ff', '#ff80f2', '#b620ff'], desc: 'Loud. Bright. Funny flex.' },
-      { id: 'emerald', name: 'Emerald Dash', price: 340, colors: ['#d7ffe7', '#57f287', '#0aa15d'], desc: 'Fresh green energy.' },
-      { id: 'sunfire', name: 'Sunfire', price: 420, colors: ['#fff0d1', '#ffb347', '#ff5b00'], desc: 'Hot skin for hot runs.' },
-      { id: 'void', name: 'Void Opal', price: 560, colors: ['#f5f3ff', '#a78bfa', '#312e81'], desc: 'Looks expensive because it is.' }
+      { id: "starter", name: "Starter", price: 0,   colors: ["#fff5ae", "#ffd84d", "#ff9a00"], desc: "Classic clean arrow." },
+      { id: "ice",     name: "Ice Bolt", price: 180, colors: ["#dff7ff", "#88e1ff", "#2bbcff"], desc: "Cold look. Very clean." },
+      { id: "plasma",  name: "Plasma Pop", price: 280, colors: ["#ffd6ff", "#ff80f2", "#b620ff"], desc: "Loud. Bright. Funny flex." },
+      { id: "emerald", name: "Emerald Dash", price: 340, colors: ["#d7ffe7", "#57f287", "#0aa15d"], desc: "Fresh green energy." },
+      { id: "sunfire", name: "Sunfire", price: 420, colors: ["#fff0d1", "#ffb347", "#ff5b00"], desc: "Hot skin for hot runs." },
+      { id: "void",    name: "Void Opal", price: 560, colors: ["#f5f3ff", "#a78bfa", "#312e81"], desc: "Looks expensive because it is." }
     ];
 
-    const rareSkinIds = ['plasma', 'void'];
-    const ADMIN_USERNAME = 'admin';
-    const ADMIN_PASSWORD = 'admin123';
-    let isAdmin = false;
-    let currentUser = null;
-    const funnyWinTexts = ['Too easy 😎', 'Clean run!', 'Bro is locked in.', 'Certified gamer moment.'];
-    const funnyLoseTexts = ['Unlucky. Totally the game’s fault.', 'That wall came outta nowhere.', 'Almost looked pro there.', 'One more try. Obviously.'];
+    const rareSkins = ["plasma", "void"];
+    const ADMIN_PASS = "admin123";
+    const WIN_MESSAGES = ["Too easy 😎", "Clean run!", "Bro is locked in.", "Certified gamer moment."];
+    const LOSE_MESSAGES = [
+      "Unlucky. Totally the game's fault.",
+      "That wall came outta nowhere.",
+      "Almost looked pro there.",
+      "One more try. Obviously."
+    ];
 
-    function defaultStore() {
+    function defaultSave() {
       return {
         coins: 0,
         bestUnlocked: 1,
-        selectedDifficulty: 'Easy',
-        selectedSkin: 'starter',
-        ownedSkins: ['starter'],
+        selectedDifficulty: "Easy",
+        selectedSkin: "starter",
+        ownedSkins: ["starter"],
         lastSpinAt: 0,
         glowEnabled: true,
         funnyEnabled: true,
         volume: 70,
-        lastLevel: 1,
-        completedGame: false
+        lastLevel: 1
       };
     }
 
-    function normalizeStore(data = {}) {
-      return {
-        coins: Number.isFinite(data.coins) ? data.coins : 0,
-        bestUnlocked: Math.min(50, Math.max(1, data.bestUnlocked ?? 1)),
-        selectedDifficulty: difficulties[data.selectedDifficulty] ? data.selectedDifficulty : 'Easy',
-        selectedSkin: data.selectedSkin || 'starter',
-        ownedSkins: Array.isArray(data.ownedSkins) && data.ownedSkins.length ? [...new Set(['starter', ...data.ownedSkins])] : ['starter'],
-        lastSpinAt: data.lastSpinAt || 0,
-        glowEnabled: data.glowEnabled !== false,
-        funnyEnabled: data.funnyEnabled !== false,
-        volume: Math.min(100, Math.max(0, data.volume ?? 70)),
-        lastLevel: Math.min(50, Math.max(1, data.lastLevel || 1)),
-        completedGame: !!data.completedGame
-      };
-    }
+    function loadSave() {
+      const raw = localStorage.getItem("wave_rush_deluxe_save");
+      if (!raw) return defaultSave();
 
-    function ensureUserShape(user) {
-      return {
-        username: user.username,
-        password: user.password || '1234',
-        isAdmin: user.username === ADMIN_USERNAME,
-        createdAt: user.createdAt || new Date().toISOString(),
-        lastLoginAt: user.lastLoginAt || null,
-        banned: user.banned && typeof user.banned === 'object' ? user.banned : { active: false, reason: '', until: null, bannedAt: null },
-        data: normalizeStore(user.data || {})
-      };
-    }
-
-    function loadUsers() {
-      const raw = localStorage.getItem('wave_rush_deluxe_users');
-      if (!raw) {
-        const users = [ensureUserShape({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() })];
-        localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
-        return users;
-      }
       try {
-        let users = JSON.parse(raw);
-        if (!Array.isArray(users)) throw new Error('Invalid users payload');
-        users = users.map(ensureUserShape);
-        const adminExists = users.some(u => u.username === ADMIN_USERNAME);
-        if (!adminExists) users.unshift(ensureUserShape({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() }));
-        users.forEach(u => { u.isAdmin = u.username === ADMIN_USERNAME; });
-        return users;
+        const parsed = JSON.parse(raw);
+        return {
+          coins: Math.max(0, parsed.coins ?? 0),
+          bestUnlocked: Math.min(50, Math.max(1, parsed.bestUnlocked ?? 1)),
+          selectedDifficulty: Object.keys(difficulties).includes(parsed.selectedDifficulty) ? parsed.selectedDifficulty : "Easy",
+          selectedSkin: skins.some(s => s.id === parsed.selectedSkin) ? parsed.selectedSkin : "starter",
+          ownedSkins: Array.isArray(parsed.ownedSkins)
+            ? parsed.ownedSkins.filter(id => skins.some(s => s.id === id))
+            : ["starter"],
+          lastSpinAt: parsed.lastSpinAt ?? 0,
+          glowEnabled: parsed.glowEnabled !== false,
+          funnyEnabled: parsed.funnyEnabled !== false,
+          volume: Math.max(0, Math.min(100, parsed.volume ?? 70)),
+          lastLevel: Math.min(50, Math.max(1, parsed.lastLevel ?? 1))
+        };
       } catch {
-        const users = [ensureUserShape({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD, isAdmin: true, data: defaultStore() })];
-        localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
-        return users;
+        return defaultSave();
       }
     }
 
-    function saveUsers() {
-      localStorage.setItem('wave_rush_deluxe_users', JSON.stringify(users));
-    }
-
-    function migrateLegacySaveIfNeeded() {
-      const raw = localStorage.getItem('wave_rush_deluxe_save');
-      if (!raw) return;
-      try {
-        const legacy = normalizeStore(JSON.parse(raw));
-        const admin = users.find(u => u.username === ADMIN_USERNAME);
-        if (admin && (!admin.data || admin.data.bestUnlocked === 1 && admin.data.coins === 0)) {
-          admin.data = legacy;
-        }
-        localStorage.removeItem('wave_rush_deluxe_save');
-        saveUsers();
-      } catch {}
-    }
-
-    let users = loadUsers();
-    migrateLegacySaveIfNeeded();
-
-    function setCurrentUser(username) {
-      const user = users.find(u => u.username === username);
-      if (!user) return false;
-      const banState = getBanState(user);
-      if (banState.active) {
-        showToast(banState.message);
-        return false;
-      }
-      user.lastLoginAt = new Date().toISOString();
-      currentUser = user;
-      isAdmin = !!user.isAdmin;
-      localStorage.setItem('wave_rush_deluxe_session', user.username);
-      store = normalizeStore(user.data || {});
-      selectedDifficulty = store.selectedDifficulty;
-      selectedSkin = store.selectedSkin;
-      glowEnabled = store.glowEnabled;
-      funnyEnabled = store.funnyEnabled;
-      saveUsers();
-      return true;
-    }
-
-    function getSessionUser() {
-      return localStorage.getItem('wave_rush_deluxe_session');
-    }
-
-    function clearSession() {
-      localStorage.removeItem('wave_rush_deluxe_session');
-      currentUser = null;
-      isAdmin = false;
-    }
-
-    let store = defaultStore();
+    let store = loadSave();
     let selectedDifficulty = store.selectedDifficulty;
     let selectedSkin = store.selectedSkin;
     let glowEnabled = store.glowEnabled;
     let funnyEnabled = store.funnyEnabled;
-    let feedbackEntries = JSON.parse(localStorage.getItem('wave_rush_deluxe_feedback') || '[]');
+    let isAdmin = false;
 
-    function saveFeedback() {
-      localStorage.setItem('wave_rush_deluxe_feedback', JSON.stringify(feedbackEntries));
+    const firebaseConfig = {
+      apiKey: "AIzaSyD1ttQ77mOAANAO9q4zYacnkA9uH65uVRA",
+      authDomain: "waverush-deluxe-admin.firebaseapp.com",
+      projectId: "waverush-deluxe-admin",
+      storageBucket: "waverush-deluxe-admin.firebasestorage.app",
+      messagingSenderId: "88613315935",
+      appId: "1:88613315935:web:b9419681dde81f699182ea",
+      measurementId: "G-83BCSZSQDC"
+    };
+
+    const currentUserId = localStorage.getItem("wave_rush_user_id") || (() => {
+      const id = "user_" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem("wave_rush_user_id", id);
+      return id;
+    })();
+
+    const currentUserName = localStorage.getItem("wave_rush_user_name") || (() => {
+      const name = prompt("Shkruje emrin e userit për admin panel / leaderboard:", "Player-" + currentUserId.slice(-4)) || ("Player-" + currentUserId.slice(-4));
+      localStorage.setItem("wave_rush_user_name", name.trim() || ("Player-" + currentUserId.slice(-4)));
+      return localStorage.getItem("wave_rush_user_name");
+    })();
+
+    let firebaseReady = false;
+    let db = null;
+    let usersUnsubscribe = null;
+    let currentUserUnsubscribe = null;
+    let presenceInterval = null;
+    let adminUsers = [];
+
+    function saveGame() {
+      localStorage.setItem("wave_rush_deluxe_save", JSON.stringify(store));
+      syncCurrentUserToCloud().catch(() => {});
     }
 
-    function formatDate(iso) {
-      if (!iso) return '—';
-      const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) return '—';
-      return d.toLocaleString();
-    }
-
-    function getBanState(user = currentUser) {
-      if (!user || !user.banned?.active) return { active: false, message: '' };
-      if (user.banned.until && Date.now() > user.banned.until) {
-        user.banned = { active: false, reason: '', until: null, bannedAt: null };
-        saveUsers();
-        return { active: false, message: '' };
+    function syncOwnedSkins() {
+      if (!store.ownedSkins.includes("starter")) store.ownedSkins.push("starter");
+      for (const skin of skins) {
+        skin.owned = skin.price === 0 || store.ownedSkins.includes(skin.id);
       }
-      const isPermanent = !user.banned.until;
-      const duration = isPermanent ? 'Permanent ban' : `Banned until ${new Date(user.banned.until).toLocaleString()}`;
-      const reason = user.banned.reason || 'No reason specified';
-      return { active: true, message: `${duration}. Reason: ${reason}` };
     }
 
-    function saveStore() {
-      if (!currentUser) return;
-      store.selectedDifficulty = selectedDifficulty;
-      store.selectedSkin = selectedSkin;
-      store.glowEnabled = glowEnabled;
-      store.funnyEnabled = funnyEnabled;
-      const idx = users.findIndex(u => u.username === currentUser.username);
-      if (idx !== -1) {
-        users[idx].data = normalizeStore(store);
-        currentUser = users[idx];
-        saveUsers();
+    syncOwnedSkins();
+
+    function isFirebaseConfigured() {
+      return firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+    }
+
+    function setFirebaseStatus(message, connected = false) {
+      const el = document.getElementById("firebaseStatusBox");
+      if (!el) return;
+      el.textContent = message;
+      el.style.background = connected ? "rgba(34,197,94,.12)" : "rgba(245,158,11,.12)";
+      el.style.borderColor = connected ? "rgba(34,197,94,.28)" : "rgba(245,158,11,.28)";
+      el.style.color = connected ? "#bbf7d0" : "#fde68a";
+    }
+
+    function getUserPayload(overrides = {}) {
+      return {
+        uid: currentUserId,
+        name: currentUserName,
+        coins: store.coins,
+        bestUnlocked: store.bestUnlocked,
+        selectedDifficulty,
+        selectedSkin,
+        ownedSkins: store.ownedSkins,
+        lastLevel: currentLevel,
+        lastSpinAt: store.lastSpinAt,
+        glowEnabled,
+        funnyEnabled,
+        online: true,
+        banned: false,
+        lastSeen: Date.now(),
+        updatedAt: Date.now(),
+        ...overrides
+      };
+    }
+
+    async function initializeFirebase() {
+      if (!isFirebaseConfigured() || typeof firebase === "undefined") {
+        setFirebaseStatus("Firebase s'është konfiguru ende. Plotëso firebaseConfig në kod.", false);
+        return;
+      }
+
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+        firebaseReady = true;
+        setFirebaseStatus("Firebase u lidh me sukses. Admin paneli tash lexon users nga Firestore.", true);
+        await syncCurrentUserToCloud();
+        listenToCurrentUserDoc();
+        startPresenceHeartbeat();
+      } catch (error) {
+        console.error(error);
+        firebaseReady = false;
+        setFirebaseStatus("Gabim me Firebase: " + error.message, false);
       }
     }
 
-    function syncSkinOwnership() { skins.forEach(s => s.owned = s.price === 0 || store.ownedSkins.includes(s.id)); }
-    syncSkinOwnership();
+    async function syncCurrentUserToCloud() {
+      if (!firebaseReady || !db) return;
+      await db.collection("waveRushUsers").doc(currentUserId).set(getUserPayload(), { merge: true });
+    }
+
+    function startPresenceHeartbeat() {
+      if (!firebaseReady || !db) return;
+      clearInterval(presenceInterval);
+      presenceInterval = setInterval(() => {
+        db.collection("waveRushUsers").doc(currentUserId).set({
+          online: true,
+          lastSeen: Date.now(),
+          updatedAt: Date.now()
+        }, { merge: true }).catch(() => {});
+      }, 20000);
+
+      window.addEventListener("beforeunload", () => {
+        try {
+          db.collection("waveRushUsers").doc(currentUserId).set({
+            online: false,
+            lastSeen: Date.now(),
+            updatedAt: Date.now()
+          }, { merge: true });
+        } catch {}
+      });
+    }
+
+    function listenToCurrentUserDoc() {
+      if (!firebaseReady || !db) return;
+      if (currentUserUnsubscribe) currentUserUnsubscribe();
+      currentUserUnsubscribe = db.collection("waveRushUsers").doc(currentUserId).onSnapshot((snap) => {
+        if (!snap.exists) return;
+        const data = snap.data() || {};
+
+        if (typeof data.coins === "number") store.coins = Math.max(0, data.coins);
+        if (typeof data.bestUnlocked === "number") store.bestUnlocked = Math.max(1, Math.min(50, data.bestUnlocked));
+        if (typeof data.lastLevel === "number") {
+          currentLevel = Math.max(1, Math.min(50, data.lastLevel));
+          store.lastLevel = currentLevel;
+          levelSelect.value = String(currentLevel);
+        }
+        if (typeof data.lastSpinAt === "number") store.lastSpinAt = data.lastSpinAt;
+        if (Array.isArray(data.ownedSkins)) store.ownedSkins = data.ownedSkins.filter(id => skins.some(s => s.id === id));
+        if (typeof data.selectedSkin === "string" && skins.some(s => s.id === data.selectedSkin)) selectedSkin = data.selectedSkin;
+        if (typeof data.selectedDifficulty === "string" && difficulties[data.selectedDifficulty]) selectedDifficulty = data.selectedDifficulty;
+
+        if (data.banned) {
+          statusEl.textContent = "Banned";
+          menuScreen.classList.remove("hidden");
+          gameControls.classList.add("hidden");
+          if (animationId) cancelAnimationFrame(animationId);
+          gameStarted = false;
+          paused = true;
+          showToast("Ky user është ban nga admini.");
+        }
+
+        localStorage.setItem("wave_rush_deluxe_save", JSON.stringify(store));
+        syncOwnedSkins();
+        updateTopUI();
+        renderSkins();
+        renderLevels();
+        renderSpinPage();
+      });
+    }
+
+    function renderAdminUsers() {
+      const grid = document.getElementById("adminUsersGrid");
+      const countEl = document.getElementById("usersCount");
+      if (!grid || !countEl) return;
+      countEl.textContent = adminUsers.length;
+
+      if (!adminUsers.length) {
+        grid.innerHTML = '<div class="card"><div class="card-title">Ska users ende</div><div class="card-text">Kur users hyjnë dhe Firebase është aktiv, qitu shfaqen krejt.</div></div>';
+        return;
+      }
+
+      grid.innerHTML = adminUsers.map((user) => {
+        const onlineClass = user.online ? "online" : "offline";
+        const lastSeen = user.lastSeen ? new Date(user.lastSeen).toLocaleString() : "-";
+        return `
+          <div class="user-card ${user.online ? "online" : ""}">
+            <div class="user-head">
+              <div>
+                <div class="user-name">${user.name || user.uid}</div>
+                <div class="card-text">${user.uid}</div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                <span class="badge ${onlineClass}">${user.online ? "Online" : "Offline"}</span>
+                ${user.banned ? '<span class="badge banned">Banned</span>' : ""}
+              </div>
+            </div>
+            <div class="user-meta">
+              <div class="mini"><div class="mini-label">Coins</div><div class="mini-value">${user.coins || 0}</div></div>
+              <div class="mini"><div class="mini-label">Best</div><div class="mini-value">${user.bestUnlocked || 1}</div></div>
+              <div class="mini"><div class="mini-label">Current Level</div><div class="mini-value">${user.lastLevel || 1}</div></div>
+              <div class="mini"><div class="mini-label">Last Seen</div><div class="mini-value">${lastSeen}</div></div>
+            </div>
+            <div class="user-actions">
+              <button class="green" onclick="adminAction('${user.uid}','coins',100)">+100</button>
+              <button class="green" onclick="adminAction('${user.uid}','coins',500)">+500</button>
+              <button class="purple" onclick="adminAction('${user.uid}','unlock')">Unlock 50</button>
+              <button class="blue" onclick="adminAction('${user.uid}','spin')">Reset Spin</button>
+              <button class="danger" onclick="adminAction('${user.uid}','ban')">${user.banned ? "Unban" : "Ban"}</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function subscribeAdminUsers() {
+      if (!firebaseReady || !db) {
+        adminUsers = [];
+        renderAdminUsers();
+        return;
+      }
+      if (usersUnsubscribe) usersUnsubscribe();
+      usersUnsubscribe = db.collection("waveRushUsers").orderBy("updatedAt", "desc").onSnapshot((snapshot) => {
+        adminUsers = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+        renderAdminUsers();
+      }, (error) => {
+        console.error(error);
+        showToast("S'u lexuan users nga Firebase.");
+      });
+    }
+
+    window.adminAction = async function(uid, action, value = 0) {
+      if (!isAdmin) return showToast("Admin only");
+      if (!firebaseReady || !db) return showToast("Lidhe Firebase-in ma parë");
+      try {
+        const ref = db.collection("waveRushUsers").doc(uid);
+        const snap = await ref.get();
+        if (!snap.exists) return showToast("User nuk u gjet");
+        const data = snap.data() || {};
+
+        if (action === "coins") {
+          await ref.set({ coins: Math.max(0, (data.coins || 0) + value), updatedAt: Date.now() }, { merge: true });
+          showToast(`Coins updated for ${data.name || uid}`);
+        } else if (action === "unlock") {
+          await ref.set({ bestUnlocked: 50, updatedAt: Date.now() }, { merge: true });
+          showToast(`Levels unlocked for ${data.name || uid}`);
+        } else if (action === "spin") {
+          await ref.set({ lastSpinAt: 0, updatedAt: Date.now() }, { merge: true });
+          showToast(`Daily spin reset for ${data.name || uid}`);
+        } else if (action === "ban") {
+          await ref.set({ banned: !data.banned, online: data.banned ? !!data.online : false, updatedAt: Date.now() }, { merge: true });
+          showToast(`${data.banned ? "Unbanned" : "Banned"} ${data.name || uid}`);
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("Admin action failed");
+      }
+    };
 
     for (let i = 1; i <= 50; i++) {
-      const opt = document.createElement('option');
-      opt.value = i; opt.textContent = 'Level ' + i; levelSelect.appendChild(opt);
-      const opt2 = document.createElement('option');
-      opt2.value = i; opt2.textContent = 'Level ' + i; document.getElementById('adminLevelSelect').appendChild(opt2);
+      const option1 = document.createElement("option");
+      option1.value = i;
+      option1.textContent = "Level " + i;
+      levelSelect.appendChild(option1);
+
+      const option2 = document.createElement("option");
+      option2.value = i;
+      option2.textContent = "Level " + i;
+      document.getElementById("adminLevelSelect").appendChild(option2);
     }
+
     levelSelect.value = String(store.lastLevel || 1);
 
-    function refreshLevelSelectAccess() {
-      [...levelSelect.options].forEach(opt => {
-        const lv = Number(opt.value);
-        const unlocked = isAdmin || lv <= store.bestUnlocked;
-        opt.disabled = !unlocked;
-        opt.textContent = `Level ${lv}${unlocked ? '' : ' 🔒'}`;
-      });
-      if (Number(levelSelect.value) > store.bestUnlocked && !isAdmin) levelSelect.value = String(store.bestUnlocked);
-    }
-
-    function updateTopbar() {
+    function updateTopUI() {
       coinsEl.textContent = store.coins;
       bestEl.textContent = store.bestUnlocked;
       shopCoinsEl.textContent = store.coins;
       modeEl.textContent = selectedDifficulty;
-      selectedDifficultyPreviewEl.textContent = selectedDifficulty;
-      selectedSkinPreviewEl.textContent = (skins.find(s => s.id === selectedSkin)?.name) || 'Starter';
-      document.getElementById('volumeRange').value = store.volume;
-      document.getElementById('volumeValue').textContent = store.volume;
-      currentUserLabelEl.textContent = currentUser ? currentUser.username : 'Guest';
-      document.getElementById('adminBtn').style.display = isAdmin ? '' : 'none';
-      document.getElementById('logoutBtn').style.display = currentUser ? '' : 'none';
-      document.getElementById('loginBtn').style.display = currentUser ? 'none' : '';
-      document.getElementById('registerBtn').style.display = currentUser ? 'none' : '';
-      document.getElementById('feedbackBtn').style.display = currentUser ? '' : 'none';
-      refreshLevelSelectAccess();
+      difficultyPreviewEl.textContent = selectedDifficulty;
+      skinPreviewEl.textContent = (skins.find(s => s.id === selectedSkin)?.name) || "Starter";
+      document.getElementById("volumeRange").value = store.volume;
+      document.getElementById("volumeValue").textContent = store.volume;
     }
 
-    function showToast(msg) {
-      toastEl.textContent = msg;
-      toastEl.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toastEl.classList.remove("show"), 2200);
     }
 
     function showPage(page) {
-      [homePage, difficultyPage, skinsPage, spinPage, levelsPage, optionsPage, aboutPage, feedbackPage, adminPage].forEach(p => p.classList.add('hidden'));
-      page.classList.remove('hidden');
-    }
-
-    function requireLogin() {
-      if (currentUser) return true;
-      showToast('Login required to play.');
-      return false;
-    }
-
-    function loginFlow() {
-      const username = prompt('Username');
-      if (username === null) return;
-      const password = prompt('Password');
-      if (password === null) return;
-      const user = users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
-      if (!user || user.password !== password) return showToast('Invalid credentials');
-      const banState = getBanState(user);
-      if (banState.active) return showToast(banState.message);
-      setCurrentUser(user.username);
-      syncSkinOwnership();
-      renderSkins();
-      updateTopbar();
-      showToast(`Welcome ${user.username}!`);
-    }
-
-    function registerFlow() {
-      const usernameRaw = prompt('Choose username (3-16 chars)');
-      if (usernameRaw === null) return;
-      const username = usernameRaw.trim();
-      if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) return showToast('Use 3-16 letters/numbers/_');
-      if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) return showToast('Username already exists');
-      const password = prompt('Choose password (min 4 chars)');
-      if (password === null) return;
-      if (password.length < 4) return showToast('Password too short');
-      users.push(ensureUserShape({ username, password, isAdmin: false, data: defaultStore() }));
-      saveUsers();
-      setCurrentUser(username);
-      syncSkinOwnership();
-      renderSkins();
-      updateTopbar();
-      showToast('Account created');
-    }
-
-    function populateAdminUsers() {
-      const select = document.getElementById('adminUserSelect');
-      if (!select) return;
-      const search = document.getElementById('adminUserSearch')?.value?.toLowerCase() || '';
-      select.innerHTML = '';
-      users.filter(u => u.username.toLowerCase().includes(search)).forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.username;
-        opt.textContent = `${u.username}${u.isAdmin ? ' (admin)' : ''}`;
-        select.appendChild(opt);
-      });
-    }
-
-    function renderAdminUsersTable() {
-      const body = document.getElementById('adminUsersTableBody');
-      if (!body) return;
-      const search = document.getElementById('adminUserSearch')?.value?.toLowerCase() || '';
-      body.innerHTML = '';
-      users.filter(u => u.username.toLowerCase().includes(search)).forEach(u => {
-        const ban = getBanState(u);
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${u.username}${u.isAdmin ? ' (admin)' : ''}</td>
-          <td>${formatDate(u.createdAt)}</td>
-          <td>${formatDate(u.lastLoginAt)}</td>
-          <td>L${u.data.lastLevel} / Best ${u.data.bestUnlocked}</td>
-          <td>${u.data.coins}</td>
-          <td><span class="pill ${ban.active ? 'danger' : 'ok'}">${ban.active ? 'Banned' : 'Active'}</span></td>`;
-        body.appendChild(row);
-      });
-    }
-
-    function renderFeedbackViews() {
-      const mine = document.getElementById('myFeedbackList');
-      if (mine && currentUser) {
-        const rows = feedbackEntries.filter(f => f.username === currentUser.username).slice(-8).reverse();
-        mine.innerHTML = rows.length ? rows.map(r => `<div style="margin-bottom:8px;"><b>${r.type}</b> • ${formatDate(r.createdAt)} • ${r.read ? 'Read' : 'Unread'}<br>${r.message}</div>`).join('') : 'No submissions yet.';
-      }
-      const body = document.getElementById('adminFeedbackTableBody');
-      if (!body) return;
-      const mode = document.getElementById('feedbackFilter')?.value || 'unread';
-      const userFilter = (document.getElementById('feedbackUserFilter')?.value || '').toLowerCase();
-      body.innerHTML = '';
-      feedbackEntries.filter(f => (mode === 'all' || !f.read) && (!userFilter || f.username.toLowerCase().includes(userFilter))).slice().reverse().forEach(f => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${f.username}</td><td>${f.type}</td><td>${formatDate(f.createdAt)}</td><td><span class="pill ${f.read ? 'ok' : 'warn'}">${f.read ? 'Read' : 'Unread'}</span></td><td>${f.message}</td>`;
-        body.appendChild(tr);
-      });
+      [homePage, difficultyPage, skinsPage, spinPage, levelsPage, optionsPage, aboutPage, adminPage]
+        .forEach(p => p.classList.add("hidden"));
+      page.classList.remove("hidden");
     }
 
     function openMenu(page = homePage) {
-      cancelAnimationFrame(animationId);
-      gameStarted = false;
-      menuScreen.classList.remove('hidden');
-      gameControls.classList.add('hidden');
-      finishScreen.classList.add('hidden');
-      statusEl.textContent = 'Menu';
+      menuScreen.classList.remove("hidden");
+      gameControls.classList.add("hidden");
+      statusEl.textContent = "Menu";
       renderDifficultyCards();
       renderSkins();
       renderSpinPage();
-      renderLevelsGrid();
-      populateAdminUsers();
-      renderAdminUsersTable();
-      renderFeedbackViews();
-      updateTopbar();
+      renderLevels();
+      updateTopUI();
       showPage(page);
     }
 
     function closeMenu() {
-      menuScreen.classList.add('hidden');
-      gameControls.classList.remove('hidden');
+      menuScreen.classList.add("hidden");
+      gameControls.classList.remove("hidden");
     }
 
     function renderDifficultyCards() {
-      difficultyList.innerHTML = '';
-      Object.entries(difficulties).forEach(([key, d]) => {
-        const el = document.createElement('div');
-        el.className = 'card selectable' + (selectedDifficulty === key ? ' selected' : '');
-        el.innerHTML = `<div class="card-title">${key}</div><div class="card-text">${d.desc}</div>`;
+      difficultyList.innerHTML = "";
+      for (const [name, data] of Object.entries(difficulties)) {
+        const el = document.createElement("div");
+        el.className = "card selectable" + (selectedDifficulty === name ? " selected" : "");
+        el.innerHTML = `
+          <div class="card-title">${name}</div>
+          <div class="card-text">${data.desc}</div>
+        `;
         el.onclick = () => {
-          selectedDifficulty = key;
-          store.selectedDifficulty = key;
-          saveStore();
-          updateTopbar();
+          selectedDifficulty = name;
+          store.selectedDifficulty = name;
+          saveGame();
+          updateTopUI();
           renderDifficultyCards();
         };
         difficultyList.appendChild(el);
-      });
+      }
     }
 
     function renderSkins() {
-      syncSkinOwnership();
-      skinsGrid.innerHTML = '';
-      skins.forEach(skin => {
+      syncOwnedSkins();
+      skinsGrid.innerHTML = "";
+
+      for (const skin of skins) {
         const active = selectedSkin === skin.id;
-        const card = document.createElement('div');
-        card.className = 'card' + (active ? ' selected' : '');
-        const actionLabel = !skin.owned ? `Buy ${skin.price}` : (active ? 'Selected' : 'Select');
+        const card = document.createElement("div");
+        card.className = "card" + (active ? " selected" : "");
+
+        let buttonLabel = "Select";
+        if (!skin.owned) buttonLabel = "Buy " + skin.price;
+        if (active) buttonLabel = "Selected";
+
         card.innerHTML = `
           <div class="skin-preview" style="background: linear-gradient(135deg, ${skin.colors[0]}, ${skin.colors[1]}, ${skin.colors[2]});"></div>
           <div class="card-title">${skin.name}</div>
           <div class="card-text">${skin.desc}</div>
-          <div class="price">${skin.owned ? 'Owned' : skin.price + ' coins'}</div>
-          <div class="small-actions"><button>${actionLabel}</button></div>
+          <div class="price">${skin.owned ? "Owned" : skin.price + " coins"}</div>
+          <div class="small-actions"><button>${buttonLabel}</button></div>
         `;
-        card.querySelector('button').onclick = (e) => {
+
+        card.querySelector("button").onclick = (e) => {
           e.stopPropagation();
+
           if (!skin.owned) {
-            if (store.coins < skin.price) return showToast('Nuk ke coins mjaftueshëm.');
+            if (store.coins < skin.price) {
+              showToast("Nuk ke coins mjaftueshëm.");
+              return;
+            }
             store.coins -= skin.price;
             store.ownedSkins.push(skin.id);
-            showToast(`Bleve ${skin.name}`);
+            showToast("Bleve " + skin.name);
           }
+
           selectedSkin = skin.id;
           store.selectedSkin = skin.id;
-          saveStore();
-          syncSkinOwnership();
-          updateTopbar();
+          saveGame();
+          syncOwnedSkins();
+          updateTopUI();
           renderSkins();
         };
+
         skinsGrid.appendChild(card);
-      });
+      }
     }
 
-    function getTimeUntilNextSpin() {
+    function getSpinTimeLeft() {
       const remaining = store.lastSpinAt + 24 * 60 * 60 * 1000 - Date.now();
       return Math.max(0, remaining);
     }
 
-    function formatRemaining(ms) {
-      if (ms <= 0) return 'Ready';
-      const total = Math.ceil(ms / 1000);
-      const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+    function formatTime(ms) {
+      if (ms <= 0) return "Ready";
+      const totalSeconds = Math.ceil(ms / 1000);
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
       return `${h}h ${m}m ${s}s`;
     }
 
     function renderSpinPage() {
-      spinRewardsPreview.innerHTML = '';
-      [
-        ['50 Coins', 'Common'], ['120 Coins', 'Nice'], ['250 Coins', 'Big'], ['Rare Skin', 'Lucky hit'], ['300 Coins', 'Jackpot-ish'], ['Bonus Coins', 'More shiny money']
-      ].forEach(([t, d]) => {
-        const item = document.createElement('div');
-        item.className = 'card';
-        item.innerHTML = `<div class="card-title">${t}</div><div class="card-text">${d}</div>`;
+      spinRewardsPreview.innerHTML = "";
+      const items = [
+        ["50 Coins", "Common"],
+        ["120 Coins", "Nice"],
+        ["250 Coins", "Big"],
+        ["Rare Skin", "Lucky hit"],
+        ["300 Coins", "Jackpot-ish"],
+        ["Bonus Coins", "More shiny money"]
+      ];
+
+      for (const [title, desc] of items) {
+        const item = document.createElement("div");
+        item.className = "card";
+        item.innerHTML = `<div class="card-title">${title}</div><div class="card-text">${desc}</div>`;
         spinRewardsPreview.appendChild(item);
-      });
-      spinTimerEl.textContent = formatRemaining(getTimeUntilNextSpin());
-      document.getElementById('doSpinBtn').disabled = getTimeUntilNextSpin() > 0;
+      }
+
+      spinTimerEl.textContent = formatTime(getSpinTimeLeft());
+      document.getElementById("doSpinBtn").disabled = getSpinTimeLeft() > 0;
     }
 
     setInterval(() => {
-      if (!spinPage.classList.contains('hidden')) renderSpinPage();
+      if (!spinPage.classList.contains("hidden")) renderSpinPage();
     }, 1000);
 
     let spinning = false;
-    function doDailySpin() {
-      if (!requireLogin()) return;
+
+    function doSpin() {
       if (spinning) return;
-      if (getTimeUntilNextSpin() > 0) return showToast('Spin nuk është gati ende.');
+      if (getSpinTimeLeft() > 0) {
+        showToast("Spin nuk është gati ende.");
+        return;
+      }
+
       spinning = true;
       const fullTurns = 5 + Math.floor(Math.random() * 3);
-      const extraDeg = Math.floor(Math.random() * 360);
-      const finalDeg = fullTurns * 360 + extraDeg;
+      const extra = Math.floor(Math.random() * 360);
+      const finalDeg = fullTurns * 360 + extra;
       spinWheel.style.transform = `rotate(${finalDeg}deg)`;
 
       setTimeout(() => {
         const roll = Math.random();
-        let message = '';
-        if (roll < 0.45) { store.coins += 50; message = 'Fite 50 coins!'; }
-        else if (roll < 0.75) { store.coins += 120; message = 'Fite 120 coins!'; }
-        else if (roll < 0.90) { store.coins += 250; message = 'Fite 250 coins!'; }
-        else if (roll < 0.97) {
-          const lockedRare = rareSkinIds.filter(id => !store.ownedSkins.includes(id));
+        let msg = "";
+
+        if (roll < 0.45) {
+          store.coins += 50;
+          msg = "Fite 50 coins!";
+        } else if (roll < 0.75) {
+          store.coins += 120;
+          msg = "Fite 120 coins!";
+        } else if (roll < 0.9) {
+          store.coins += 250;
+          msg = "Fite 250 coins!";
+        } else if (roll < 0.97) {
+          const lockedRare = rareSkins.filter(id => !store.ownedSkins.includes(id));
           if (lockedRare.length) {
             const id = lockedRare[Math.floor(Math.random() * lockedRare.length)];
             store.ownedSkins.push(id);
-            message = `Lucky! Skin unlocked: ${skins.find(s => s.id === id).name}`;
-          } else { store.coins += 300; message = 'Fite 300 coins!'; }
-        } else { store.coins += 500; message = 'WHAT? 500 coins jackpot!'; }
+            msg = "Lucky! Skin unlocked: " + (skins.find(s => s.id === id)?.name || id);
+          } else {
+            store.coins += 300;
+            msg = "Fite 300 coins!";
+          }
+        } else {
+          store.coins += 500;
+          msg = "WHAT? 500 coins jackpot!";
+        }
 
         store.lastSpinAt = Date.now();
-        saveStore();
-        syncSkinOwnership();
-        updateTopbar();
+        saveGame();
+        syncOwnedSkins();
+        updateTopUI();
         renderSpinPage();
         renderSkins();
-        showToast(message);
+        showToast(msg);
         spinning = false;
       }, 4300);
     }
 
-    function renderLevelsGrid() {
-      levelsPreviewGrid.innerHTML = '';
+    function renderLevels() {
+      levelsPreviewGrid.innerHTML = "";
       for (let i = 1; i <= 50; i++) {
-        const card = document.createElement('div');
-        const unlocked = isAdmin || i <= store.bestUnlocked;
-        card.className = 'card' + (unlocked ? ' selectable' : '') + (Number(levelSelect.value) === i ? ' selected' : '');
-        const tag = i <= 10 ? 'Easy' : i <= 20 ? 'Hard' : i <= 30 ? 'Extreme' : 'Insane';
-        card.innerHTML = `<div class="card-title">Level ${i}${unlocked ? '' : ' 🔒'}</div><div class="card-text">Tier: ${tag}${unlocked ? '' : ' • Locked'}</div>`;
+        const card = document.createElement("div");
+        const isSelected = Number(levelSelect.value) === i;
+        const isLocked = i > store.bestUnlocked;
+
+        card.className = "card selectable" + (isSelected ? " selected" : "");
+        const tier = i <= 10 ? "Easy" : i <= 20 ? "Normal" : i <= 30 ? "Hard" : i <= 40 ? "Extreme" : "Insane";
+
+        card.innerHTML = `
+          <div class="card-title">Level ${i}</div>
+          <div class="card-text">Tier: ${tier}</div>
+          <div class="price">${isLocked ? "Locked" : "Unlocked"}</div>
+        `;
+
         card.onclick = () => {
-          if (!unlocked) return showToast('Level is locked. Beat previous levels first.');
           levelSelect.value = String(i);
-          renderLevelsGrid();
+          renderLevels();
         };
+
         levelsPreviewGrid.appendChild(card);
       }
     }
 
-    let W = window.innerWidth, H = window.innerHeight;
-    canvas.width = W; canvas.height = H;
-    let topBound = 34, bottomBound = H - 34;
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    let DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+
+    let topBound = 34;
+    let bottomBound = H - 34;
+
+    const bgCanvas = document.createElement("canvas");
+    const bgCtx = bgCanvas.getContext("2d");
+
+    const player = {
+      x: W * 0.2,
+      y: H * 0.5,
+      vy: 0,
+      accel: 0.42,
+      angle: 0,
+      trail: []
+    };
 
     function resizeCanvas() {
-      W = window.innerWidth; H = window.innerHeight;
-      canvas.width = W; canvas.height = H; topBound = 34; bottomBound = H - 34;
-      player.x = W * 0.2; if (player.y > bottomBound - 30) player.y = bottomBound - 30;
-      seedStars();
-    }
-    window.addEventListener('resize', resizeCanvas);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
-    let stars = [], sparkles = [], walls = [], confetti = [];
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+      bgCanvas.width = Math.floor(W * DPR);
+      bgCanvas.height = Math.floor(H * DPR);
+      bgCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+      topBound = 34;
+      bottomBound = H - 34;
+
+      player.x = W * 0.2;
+      if (player.y > bottomBound - 30) player.y = bottomBound - 30;
+
+      seedStars();
+      buildStaticBackground();
+    }
+
+    let stars = [];
+    let sparkles = [];
+    let walls = [];
+
     function seedStars() {
       stars = [];
-      for (let i = 0; i < 140; i++) stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.8 + 0.3, a: Math.random() * 0.7 + 0.15 });
+      const count = W < 800 ? 40 : 70;
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.6 + 0.3,
+          a: Math.random() * 0.6 + 0.15
+        });
+      }
     }
-    seedStars();
 
-    function rand(min, max) { return Math.random() * (max - min) + min; }
-    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function buildStaticBackground() {
+      const grad = bgCtx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, "#220048");
+      grad.addColorStop(0.45, "#6f1dcb");
+      grad.addColorStop(1, "#1a0437");
+      bgCtx.fillStyle = grad;
+      bgCtx.fillRect(0, 0, W, H);
 
-    let animationId = null, gameStarted = false, paused = false, gameOver = false, levelDone = false, holding = false, frame = 0, progress = 0, finishCelebration = 0;
+      const sun = bgCtx.createRadialGradient(W * 0.18, H * 0.42, 20, W * 0.18, H * 0.42, 260);
+      sun.addColorStop(0, "rgba(255,234,110,0.95)");
+      sun.addColorStop(0.18, "rgba(255,216,90,0.55)");
+      sun.addColorStop(0.5, "rgba(255,216,90,0.15)");
+      sun.addColorStop(1, "rgba(255,216,90,0)");
+      bgCtx.fillStyle = sun;
+      bgCtx.beginPath();
+      bgCtx.arc(W * 0.18, H * 0.42, 260, 0, Math.PI * 2);
+      bgCtx.fill();
+
+      bgCtx.strokeStyle = "rgba(255,255,255,0.05)";
+      bgCtx.lineWidth = 1;
+      for (let y = 0; y < H; y += 32) {
+        bgCtx.beginPath();
+        bgCtx.moveTo(0, y);
+        bgCtx.lineTo(W, y);
+        bgCtx.stroke();
+      }
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    let animationId = null;
+    let gameStarted = false;
+    let paused = false;
+    let gameOver = false;
+    let levelDone = false;
+    let holding = false;
+    let frame = 0;
+    let progress = 0;
+    let finishCelebration = 0;
     let currentLevel = store.lastLevel || 1;
-    const segmentWidth = 220, segmentsToClear = 20;
-    const player = { x: W * 0.2, y: H * 0.5, vy: 0, accel: 0.42, angle: 0, trail: [] };
 
-    function baseLevelSettings(level) {
-      if (level <= 10) return { gap: 190 - level * 4, speed: 5.7 + level * 0.08, jitter: 18 + level * 2, pattern: 'easy' };
-      if (level <= 20) return { gap: 160 - (level - 10) * 3, speed: 6.5 + (level - 10) * 0.09, jitter: 36 + (level - 10) * 2.5, pattern: 'mix' };
-      if (level <= 30) return { gap: 136 - (level - 20) * 2.4, speed: 7.4 + (level - 20) * 0.1, jitter: 52 + (level - 20) * 3, pattern: 'zigzag' };
-      if (level <= 40) return { gap: 118 - (level - 30) * 1.8, speed: 8.4 + (level - 30) * 0.11, jitter: 76 + (level - 30) * 3.2, pattern: 'tight' };
-      return { gap: 102 - (level - 40) * 1.3, speed: 9.5 + (level - 40) * 0.14, jitter: 98 + (level - 40) * 3.8, pattern: 'insane' };
+    const segmentWidth = 220;
+    const segmentCount = 22;
+
+    function getBaseLevelConfig(level) {
+      level = Math.max(1, Math.min(50, level));
+
+      if (level <= 10) return { gap: 190 - level * 4, speed: 5.7 + level * 0.08, jitter: 18 + level * 2, pattern: "easy" };
+      if (level <= 20) return { gap: 160 - (level - 10) * 3, speed: 6.5 + (level - 10) * 0.09, jitter: 36 + (level - 10) * 2.5, pattern: "mix" };
+      if (level <= 30) return { gap: 136 - (level - 20) * 2.4, speed: 7.4 + (level - 20) * 0.1, jitter: 52 + (level - 20) * 3, pattern: "zigzag" };
+      if (level <= 40) return { gap: 118 - (level - 30) * 1.8, speed: 8.4 + (level - 30) * 0.11, jitter: 76 + (level - 30) * 3.2, pattern: "tight" };
+      return { gap: 102 - (level - 40) * 1.3, speed: 9.5 + (level - 40) * 0.14, jitter: 98 + (level - 40) * 3.8, pattern: "insane" };
     }
 
-    function getConfig(level) {
-      const base = baseLevelSettings(level);
+    function getLevelConfig(level) {
+      const base = getBaseLevelConfig(level);
       const diff = difficulties[selectedDifficulty];
       return {
-        gap: Math.max(selectedDifficulty === 'Insane' ? 78 : 86, base.gap + diff.gapBonus),
-        speed: base.speed * diff.speedMul,
-        jitter: base.jitter * diff.jitterMul,
+        gap: Math.max(70, base.gap + diff.gapBonus),
+        speed: base.speed * diff.speedMult,
+        jitter: base.jitter * diff.jitterMult,
         pattern: base.pattern
       };
     }
 
     function generateLevel() {
       walls = [];
-      const cfg = getConfig(currentLevel);
-      const usableTop = 60, usableBottom = H - 60;
-      let openingY = H * 0.5 - cfg.gap / 2;
-      for (let i = 0; i < segmentsToClear; i++) {
-        const x = W + i * segmentWidth + 180;
-        if (cfg.pattern === 'easy') openingY += rand(-cfg.jitter, cfg.jitter);
-        else if (cfg.pattern === 'mix') openingY += rand(-cfg.jitter, cfg.jitter) + Math.sin(i * 0.8) * 16;
-        else if (cfg.pattern === 'zigzag') openingY += (i % 2 === 0 ? 1 : -1) * rand(cfg.jitter * 0.45, cfg.jitter);
-        else if (cfg.pattern === 'tight') openingY += Math.sin(i * 1.2) * cfg.jitter * 0.85 + rand(-14, 14);
-        else openingY += Math.sin(i * 1.45) * cfg.jitter + (i % 3 === 0 ? rand(-24, 24) : rand(-8, 8));
-        if (openingY < usableTop) openingY = usableTop;
-        if (openingY > usableBottom - cfg.gap) openingY = usableBottom - cfg.gap;
-        walls.push({ x, gapY: openingY, gapH: cfg.gap, width: segmentWidth - 26 });
+      const cfg = getLevelConfig(currentLevel);
+      const upperLimit = 60;
+      const lowerLimit = H - 60;
+      let openY = H * 0.5 - cfg.gap / 2;
+
+      for (let i = 0; i < segmentCount; i++) {
+        const px = W + i * segmentWidth + 180;
+
+        if (cfg.pattern === "easy") {
+          openY += randomBetween(-cfg.jitter, cfg.jitter);
+        } else if (cfg.pattern === "mix") {
+          openY += randomBetween(-cfg.jitter, cfg.jitter) + Math.sin(i * 0.8) * 16;
+        } else if (cfg.pattern === "zigzag") {
+          openY += (i % 2 === 0 ? 1 : -1) * randomBetween(cfg.jitter * 0.45, cfg.jitter);
+        } else if (cfg.pattern === "tight") {
+          openY += Math.sin(i * 1.2) * cfg.jitter * 0.85 + randomBetween(-14, 14);
+        } else {
+          openY += Math.sin(i * 1.45) * cfg.jitter + (i % 3 === 0 ? randomBetween(-24, 24) : randomBetween(-8, 8));
+        }
+
+        if (openY < upperLimit) openY = upperLimit;
+        if (openY > lowerLimit - cfg.gap) openY = lowerLimit - cfg.gap;
+
+        walls.push({
+          x: px,
+          gapY: openY,
+          gapH: cfg.gap,
+          width: segmentWidth - 26
+        });
       }
     }
 
     function startGame(level = currentLevel) {
-      if (!requireLogin()) return;
-      const banState = getBanState(currentUser);
-      if (banState.active) {
-        showToast(banState.message);
-        clearSession();
-        openMenu(homePage);
-        return;
-      }
-      cancelAnimationFrame(animationId);
-      currentLevel = Number(level);
-      store.lastLevel = currentLevel; saveStore();
-      frame = 0; progress = 0; finishCelebration = 0; gameStarted = true; paused = false; gameOver = false; levelDone = false; holding = false;
-      walls = []; sparkles = []; confetti = []; player.x = W * 0.2; player.y = H * 0.5; player.vy = 0; player.angle = 0; player.trail = [];
-      levelEl.textContent = currentLevel; progressEl.textContent = '0%'; modeEl.textContent = selectedDifficulty; statusEl.textContent = 'Running';
-      document.getElementById('nextLevelBtn').classList.add('hidden');
-      finishScreen.classList.add('hidden');
-      closeMenu(); generateLevel(); loop();
+      if (animationId) cancelAnimationFrame(animationId);
+
+      currentLevel = Math.max(1, Math.min(50, Number(level)));
+      if (currentLevel > store.bestUnlocked) currentLevel = store.bestUnlocked;
+
+      store.lastLevel = currentLevel;
+      saveGame();
+
+      frame = 0;
+      progress = 0;
+      finishCelebration = 0;
+      gameStarted = true;
+      paused = false;
+      gameOver = false;
+      levelDone = false;
+      holding = false;
+      walls = [];
+      sparkles = [];
+      player.x = W * 0.2;
+      player.y = H * 0.5;
+      player.vy = 0;
+      player.angle = 0;
+      player.trail = [];
+
+      levelEl.textContent = currentLevel;
+      progressEl.textContent = "0%";
+      modeEl.textContent = selectedDifficulty;
+      statusEl.textContent = "Running";
+      document.getElementById("pauseBtn").textContent = "Pause";
+
+      closeMenu();
+      generateLevel();
+      lastFrameTime = 0;
+      loop();
     }
 
-    function rewardCoinsForLevel(level) {
+    function rewardCoins(level) {
       const base = 18 + level * 4;
-      const mult = selectedDifficulty === 'Easy' ? 1 : selectedDifficulty === 'Hard' ? 1.2 : selectedDifficulty === 'Extreme' ? 1.55 : 1.95;
+      const mult = selectedDifficulty === "Easy" ? 1 : selectedDifficulty === "Hard" ? 1.2 : selectedDifficulty === "Extreme" ? 1.55 : 1.95;
       return Math.floor(base * mult);
     }
 
     function updatePlayer() {
-      const cfg = getConfig(currentLevel);
-      if (holding) player.vy -= player.accel; else player.vy += player.accel;
+      const cfg = getLevelConfig(currentLevel);
+
+      if (holding) player.vy -= player.accel;
+      else player.vy += player.accel;
+
       if (player.vy > cfg.speed) player.vy = cfg.speed;
       if (player.vy < -cfg.speed) player.vy = -cfg.speed;
+
       player.y += player.vy;
       player.angle = Math.atan2(player.vy, cfg.speed);
+
       player.trail.push({ x: player.x, y: player.y });
-      if (player.trail.length > 24) player.trail.shift();
+      if (player.trail.length > 18) player.trail.shift();
+
       if (player.y < topBound + 6 || player.y > bottomBound - 6) crash();
     }
 
     function updateWalls() {
-      const cfg = getConfig(currentLevel);
-      walls.forEach(w => w.x -= cfg.speed);
-      if (!walls.length) return;
-      const totalLength = segmentsToClear * segmentWidth;
+      const cfg = getLevelConfig(currentLevel);
+      for (const wall of walls) wall.x -= cfg.speed;
+
+      const totalLength = segmentCount * segmentWidth;
       const traveled = Math.max(0, (W + 180) - walls[0].x);
       progress = Math.min(100, Math.floor((traveled / totalLength) * 100));
-      progressEl.textContent = progress + '%';
-      const gate = getFinishGateData();
-      const touchedFinish = gate && gate.x <= player.x + 10 && Math.abs(player.y - gate.centerY) <= gate.radius + 12;
-      if (!levelDone && (touchedFinish || progress >= 100)) {
+      progressEl.textContent = progress + "%";
+
+      if (!levelDone && progress >= 100) {
         levelDone = true;
         finishCelebration = 140;
-        statusEl.textContent = 'Completing...';
-        const reward = rewardCoinsForLevel(currentLevel);
+
+        const reward = rewardCoins(currentLevel);
         store.coins += reward;
-        if (currentLevel >= store.bestUnlocked && store.bestUnlocked < 50) store.bestUnlocked = currentLevel + 1;
-        saveStore(); updateTopbar(); statusEl.textContent = 'Level Complete';
-        for (let i = 0; i < 70; i++) {
-          sparkles.push({ x: W * 0.78, y: H * 0.5, dx: rand(-6, 6), dy: rand(-6, 6), life: 1, size: 3 + Math.random() * 7, winner: true });
+        if (currentLevel >= store.bestUnlocked && store.bestUnlocked < 50) {
+          store.bestUnlocked = currentLevel + 1;
         }
-        cancelAnimationFrame(animationId); draw();
-        overlayMessage('LEVEL ' + currentLevel + ' COMPLETE', funnyEnabled ? `${reward} coins. ${pick(funnyWinTexts)}` : `+${reward} coins`);
+
+        saveGame();
+        updateTopUI();
+        statusEl.textContent = "Level Complete";
+
+        for (let i = 0; i < 36; i++) {
+          sparkles.push({
+            x: W * 0.78,
+            y: H * 0.5,
+            dx: randomBetween(-6, 6),
+            dy: randomBetween(-6, 6),
+            life: 1,
+            size: 3 + Math.random() * 5,
+            winner: true
+          });
+        }
+
+        if (animationId) cancelAnimationFrame(animationId);
+        draw();
+        drawOverlay("LEVEL " + currentLevel + " COMPLETE", funnyEnabled ? `${reward} coins. ${pickRandom(WIN_MESSAGES)}` : `${reward} coins`);
         showToast(`+${reward} coins`);
-        document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 50);
-        spawnConfetti(currentLevel >= 50 ? 220 : 120);
-        setTimeout(() => showFinishScreen(reward, currentLevel >= 50), 520);
       }
     }
 
-    function createSpark() { sparkles.push({ x: player.x - 10, y: player.y, dx: -2 - Math.random() * 2.5, dy: (Math.random() - 0.5) * 1.8, life: 1, size: 2 + Math.random() * 4 }); }
-    function spawnConfetti(amount = 120) {
-      const colors = ['#fde047', '#f472b6', '#60a5fa', '#34d399', '#f97316', '#a78bfa', '#ffffff'];
-      for (let i = 0; i < amount; i++) {
-        confetti.push({
-          x: rand(W * 0.2, W * 0.9),
-          y: rand(-H * 0.25, H * 0.35),
-          dx: rand(-2.2, 2.2),
-          dy: rand(1.1, 4.2),
-          size: rand(5, 11),
-          rot: rand(0, Math.PI * 2),
-          spin: rand(-0.12, 0.12),
-          color: pick(colors),
-          life: rand(0.8, 1.4)
-        });
-      }
+    function createSpark() {
+      if (sparkles.length > 45) return;
+      sparkles.push({
+        x: player.x - 10,
+        y: player.y,
+        dx: -2 - Math.random() * 2,
+        dy: (Math.random() - 0.5) * 1.2,
+        life: 0.8,
+        size: 2 + Math.random() * 2.5
+      });
     }
+
     function updateSparkles() {
-      createSpark();
+      if (gameStarted && !gameOver && !levelDone && frame % 2 === 0) {
+        createSpark();
+      }
+
       for (let i = sparkles.length - 1; i >= 0; i--) {
         const s = sparkles[i];
         s.x += s.dx;
         s.y += s.dy;
-        s.life -= s.winner ? 0.02 : 0.03;
+        s.life -= s.winner ? 0.03 : 0.05;
         if (s.life <= 0) sparkles.splice(i, 1);
-      }
-      for (let i = confetti.length - 1; i >= 0; i--) {
-        const c = confetti[i];
-        c.x += c.dx;
-        c.y += c.dy;
-        c.rot += c.spin;
-        c.dy += 0.02;
-        c.life -= 0.006;
-        if (c.y > H + 30 || c.life <= 0) confetti.splice(i, 1);
       }
     }
 
-    function rectHit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+    function rectsOverlap(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
     function checkCollision() {
-      const p = { x: player.x - 11, y: player.y - 11, w: 22, h: 22 };
+      const p = { x: player.x - 14, y: player.y - 14, w: 28, h: 28 };
+
       for (const wall of walls) {
-        const topRect = { x: wall.x + 3, y: 0, w: Math.max(0, wall.width - 6), h: wall.gapY };
-        const botRect = { x: wall.x + 3, y: wall.gapY + wall.gapH, w: Math.max(0, wall.width - 6), h: H - (wall.gapY + wall.gapH) };
-        if (wall.x + wall.width < p.x + 2) continue;
-        if (rectHit(p, topRect) || rectHit(p, botRect)) return crash();
+        const topRect = { x: wall.x, y: 0, w: wall.width, h: wall.gapY };
+        const bottomRect = { x: wall.x, y: wall.gapY + wall.gapH, w: wall.width, h: H - (wall.gapY + wall.gapH) };
+        if (rectsOverlap(p, topRect) || rectsOverlap(p, bottomRect)) {
+          crash();
+          return;
+        }
       }
     }
 
     function crash() {
       if (gameOver || levelDone) return;
-      gameOver = true; statusEl.textContent = 'Game Over'; cancelAnimationFrame(animationId);
-      finishScreen.classList.add('hidden');
-      for (let i = 0; i < 32; i++) sparkles.push({ x: player.x, y: player.y, dx: rand(-5, 5), dy: rand(-5, 5), life: 1, size: 3 + Math.random() * 6 });
+
+      gameOver = true;
+      statusEl.textContent = "Game Over";
+
+      if (animationId) cancelAnimationFrame(animationId);
+
+      for (let i = 0; i < 24; i++) {
+        sparkles.push({
+          x: player.x,
+          y: player.y,
+          dx: randomBetween(-5, 5),
+          dy: randomBetween(-5, 5),
+          life: 1,
+          size: 3 + Math.random() * 4
+        });
+      }
+
       draw();
-      overlayMessage('GAME OVER', funnyEnabled ? pick(funnyLoseTexts) : 'Restart për me provu prap');
+      drawOverlay("GAME OVER", funnyEnabled ? pickRandom(LOSE_MESSAGES) : "Restart për me provu prap");
     }
 
-    function overlayMessage(title, subtitle) {
-      ctx.fillStyle = 'rgba(0,0,0,0.32)'; ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.max(30, W * 0.04)}px Arial`; ctx.fillText(title, W / 2, H / 2 - 20);
-      ctx.font = `bold ${Math.max(16, W * 0.016)}px Arial`; ctx.fillText(subtitle, W / 2, H / 2 + 26);
+    function drawOverlay(title, subtitle) {
+      ctx.fillStyle = "rgba(0,0,0,0.32)";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `bold ${Math.max(30, W * 0.04)}px Arial`;
+      ctx.fillText(title, W / 2, H / 2 - 20);
+
+      ctx.font = `bold ${Math.max(16, W * 0.016)}px Arial`;
+      ctx.fillText(subtitle, W / 2, H / 2 + 26);
     }
 
     function drawBackground() {
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, '#220048'); grad.addColorStop(0.45, '#6f1dcb'); grad.addColorStop(1, '#1a0437');
-      ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-      const sun = ctx.createRadialGradient(W * 0.18, H * 0.42, 20, W * 0.18, H * 0.42, 260);
-      sun.addColorStop(0, 'rgba(255,234,110,0.95)'); sun.addColorStop(0.18, 'rgba(255,216,90,0.55)'); sun.addColorStop(0.5, 'rgba(255,216,90,0.15)'); sun.addColorStop(1, 'rgba(255,216,90,0)');
-      ctx.fillStyle = sun; ctx.beginPath(); ctx.arc(W * 0.18, H * 0.42, 260, 0, Math.PI * 2); ctx.fill();
-      for (const s of stars) {
-        ctx.globalAlpha = s.a; ctx.fillStyle = '#ffffff';
-        const x = (s.x - frame * 0.35) % (W + 40);
-        ctx.beginPath(); ctx.arc(x < -10 ? x + W + 40 : x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.globalAlpha = 1; drawGrid(); drawBorders();
-    }
+      ctx.drawImage(bgCanvas, 0, 0, W, H);
 
-    function drawGrid() {
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; const off = (frame * 0.7) % 26;
-      for (let x = -26; x < W + 26; x += 26) { ctx.beginPath(); ctx.moveTo(x - off, 0); ctx.lineTo(x - off, H); ctx.stroke(); }
-      for (let y = 0; y < H; y += 26) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      for (const s of stars) {
+        ctx.globalAlpha = s.a;
+        ctx.fillStyle = "#ffffff";
+        const px = (s.x - frame * 0.2) % (W + 40);
+        ctx.beginPath();
+        ctx.arc(px < -10 ? px + W + 40 : px, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+      drawBorders();
     }
 
     function drawBorders() {
-      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.fillStyle = '#2b0c4b'; const size = 34;
-      for (let x = 0; x < W + size; x += size) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + size / 2, 18); ctx.lineTo(x + size, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x, H); ctx.lineTo(x + size / 2, H - 18); ctx.lineTo(x + size, H); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.fillStyle = "#2b0c4b";
+      const size = 42;
+
+      for (let px = 0; px < W + size; px += size) {
+        ctx.beginPath();
+        ctx.moveTo(px, 0);
+        ctx.lineTo(px + size / 2, 18);
+        ctx.lineTo(px + size, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(px, H);
+        ctx.lineTo(px + size / 2, H - 18);
+        ctx.lineTo(px + size, H);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
       }
     }
 
-    function drawWaveTunnel() {
+    function drawTunnel() {
       for (const wall of walls) {
         drawNeonSection(wall.x, 0, wall.width, wall.gapY, true);
         drawNeonSection(wall.x, wall.gapY + wall.gapH, wall.width, H - (wall.gapY + wall.gapH), false);
@@ -1314,418 +1522,447 @@
       drawFinishGate();
     }
 
-    function drawNeonSection(x, y, width, height, upside) {
-      if (height <= 0) return;
+    function drawNeonSection(px, py, w, h, isTop) {
+      if (h <= 0) return;
+
       ctx.save();
-      if (glowEnabled) { ctx.shadowBlur = 18; ctx.shadowColor = '#ffffff'; }
-      ctx.fillStyle = '#2a0a49'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.beginPath();
-      const steps = Math.max(3, Math.floor(width / 85));
-      if (upside) {
-        ctx.moveTo(x, y + height); ctx.lineTo(x, y + 24);
-        for (let i = 0; i < steps; i++) { const bx = x + i * (width / steps), step = width / steps; ctx.lineTo(bx + step / 2, y); ctx.lineTo(bx + step, y + 24); }
-        ctx.lineTo(x + width, y + height);
-      } else {
-        ctx.moveTo(x, y); ctx.lineTo(x, y + height - 24);
-        for (let i = 0; i < steps; i++) { const bx = x + i * (width / steps), step = width / steps; ctx.lineTo(bx + step / 2, y + height); ctx.lineTo(bx + step, y + height - 24); }
-        ctx.lineTo(x + width, y);
+
+      if (glowEnabled) {
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "#ffffff";
       }
-      ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
-      for (let gx = 8; gx < width; gx += 14) { ctx.beginPath(); ctx.moveTo(x + gx, y); ctx.lineTo(x + gx, y + height); ctx.stroke(); }
-      for (let gy = 8; gy < height; gy += 14) { ctx.beginPath(); ctx.moveTo(x, y + gy); ctx.lineTo(x + width, y + gy); ctx.stroke(); }
+
+      ctx.fillStyle = "#2a0a49";
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      const steps = Math.max(3, Math.floor(w / 85));
+
+      if (isTop) {
+        ctx.moveTo(px, py + h);
+        ctx.lineTo(px, py + 24);
+        for (let i = 0; i < steps; i++) {
+          const bx = px + i * (w / steps);
+          const step = w / steps;
+          ctx.lineTo(bx + step / 2, py);
+          ctx.lineTo(bx + step, py + 24);
+        }
+        ctx.lineTo(px + w, py + h);
+      } else {
+        ctx.moveTo(px, py);
+        ctx.lineTo(px, py + h - 24);
+        for (let i = 0; i < steps; i++) {
+          const bx = px + i * (w / steps);
+          const step = w / steps;
+          ctx.lineTo(bx + step / 2, py + h);
+          ctx.lineTo(bx + step, py + h - 24);
+        }
+        ctx.lineTo(px + w, py);
+      }
+
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
       ctx.restore();
     }
 
-    function getSelectedSkinObj() { return skins.find(s => s.id === selectedSkin) || skins[0]; }
+    function getSelectedSkin() {
+      return skins.find(s => s.id === selectedSkin) || skins[0];
+    }
 
     function drawTrail() {
       for (let i = 1; i < player.trail.length; i++) {
-        const a = player.trail[i - 1], b = player.trail[i];
-        ctx.strokeStyle = `rgba(255, 242, 110, ${i / player.trail.length})`; ctx.lineWidth = 4 + i * 0.15;
-        if (glowEnabled) { ctx.shadowBlur = 15; ctx.shadowColor = '#fff06a'; }
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        const a = player.trail[i - 1];
+        const b = player.trail[i];
+        ctx.strokeStyle = `rgba(255, 242, 110, ${i / player.trail.length})`;
+        ctx.lineWidth = 3 + i * 0.12;
+
+        if (glowEnabled) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "#fff06a";
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
       }
       ctx.shadowBlur = 0;
     }
 
     function drawFinishGate() {
-      const gate = getFinishGateData();
-      if (!gate) return;
-      const gateX = gate.x;
-      const centerY = gate.centerY;
+      if (!walls.length) return;
+      const lastWall = walls[walls.length - 1];
+      const gx = lastWall.x + lastWall.width + 90;
+      if (gx < -80 || gx > W + 200) return;
+
+      const cy = H * 0.5;
       ctx.save();
+
       if (glowEnabled) {
-        ctx.shadowBlur = 22;
-        ctx.shadowColor = '#fef08a';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#fef08a";
       }
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 6;
+
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.moveTo(gateX, 90);
-      ctx.lineTo(gateX, H - 90);
+      ctx.moveTo(gx, 90);
+      ctx.lineTo(gx, H - 90);
       ctx.stroke();
 
-      ctx.strokeStyle = '#fde047';
-      ctx.lineWidth = 10;
+      ctx.strokeStyle = "#fde047";
+      ctx.lineWidth = 8;
       ctx.beginPath();
-      ctx.arc(gateX + 18, centerY, 56, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(gx + 18, cy, 56, -Math.PI / 2, Math.PI / 2);
       ctx.stroke();
 
-      ctx.fillStyle = 'rgba(255,240,120,0.22)';
+      ctx.fillStyle = "rgba(255,240,120,0.22)";
       ctx.beginPath();
-      ctx.arc(gateX + 18, centerY, 68, 0, Math.PI * 2);
+      ctx.arc(gx + 18, cy, 68, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText('FINISH', gateX - 35, 72);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 18px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText("FINISH", gx - 35, 72);
       ctx.restore();
     }
 
-    function getFinishGateData() {
-      if (!walls.length) return null;
-      const lastWall = walls[walls.length - 1];
-      const gateX = lastWall.x + lastWall.width + 90;
-      if (gateX < -80 || gateX > W + 200) return null;
-      const centerY = lastWall.gapY + lastWall.gapH / 2;
-      return { x: gateX, centerY, radius: Math.max(40, Math.min(70, lastWall.gapH * 0.42)) };
-    }
-
     function drawPlayer() {
-      const skin = getSelectedSkinObj(); drawTrail(); ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.angle);
-      if (glowEnabled) { ctx.shadowBlur = 20; ctx.shadowColor = skin.colors[1]; }
+      const skin = getSelectedSkin();
+      drawTrail();
+
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(player.angle);
+
+      if (glowEnabled) {
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = skin.colors[1];
+      }
+
       const grad = ctx.createLinearGradient(-20, -10, 16, 10);
-      grad.addColorStop(0, skin.colors[0]); grad.addColorStop(0.5, skin.colors[1]); grad.addColorStop(1, skin.colors[2]);
-      ctx.fillStyle = grad; ctx.beginPath(); ctx.moveTo(-20, -10); ctx.lineTo(14, 0); ctx.lineTo(-20, 10); ctx.lineTo(-9, 0); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(-8, -4); ctx.lineTo(5, 0); ctx.lineTo(-8, 4); ctx.closePath(); ctx.fill();
+      grad.addColorStop(0, skin.colors[0]);
+      grad.addColorStop(0.5, skin.colors[1]);
+      grad.addColorStop(1, skin.colors[2]);
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(-20, -10);
+      ctx.lineTo(14, 0);
+      ctx.lineTo(-20, 10);
+      ctx.lineTo(-9, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.moveTo(-8, -4);
+      ctx.lineTo(5, 0);
+      ctx.lineTo(-8, 4);
+      ctx.closePath();
+      ctx.fill();
+
       ctx.restore();
     }
 
     function drawSparkles() {
       for (const s of sparkles) {
         ctx.globalAlpha = s.life;
-        ctx.fillStyle = s.winner ? '#ffffff' : '#fff7b0';
-        if (glowEnabled) { ctx.shadowBlur = s.winner ? 16 : 10; ctx.shadowColor = s.winner ? '#fde68a' : '#fff7b0'; }
+        ctx.fillStyle = s.winner ? "#ffffff" : "#fff7b0";
+
+        if (glowEnabled) {
+          ctx.shadowBlur = s.winner ? 10 : 6;
+          ctx.shadowColor = s.winner ? "#fde68a" : "#fff7b0";
+        }
+
         ctx.fillRect(s.x, s.y, s.size, s.size);
       }
-      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
-    }
 
-    function drawConfetti() {
-      for (const c of confetti) {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, c.life);
-        ctx.translate(c.x, c.y);
-        ctx.rotate(c.rot);
-        ctx.fillStyle = c.color;
-        ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size * 0.65);
-        ctx.restore();
-      }
       ctx.globalAlpha = 1;
-    }
-
-    function showFinishScreen(reward, finalVictory) {
-      finishLevelEl.textContent = currentLevel;
-      finishRewardEl.textContent = `+${reward} coins`;
-      finishUnlockedEl.textContent = store.bestUnlocked;
-      finishNextBtn.classList.toggle('hidden', finalVictory);
-      if (finalVictory) {
-        store.completedGame = true;
-        saveStore();
-        finishEyebrowEl.textContent = 'Grand Victory';
-        finishTitleEl.textContent = '🏆 You Beat All 50 Levels!';
-        finishSubtitleEl.textContent = 'Legendary consistency. Enjoy the confetti and celebrate your perfect finish.';
-        statusEl.textContent = 'Final Victory';
-      } else {
-        finishEyebrowEl.textContent = 'Level Complete';
-        finishTitleEl.textContent = `Level ${currentLevel} Cleared`;
-        finishSubtitleEl.textContent = 'Smooth run. Reward secured. Continue your progress or restart for a cleaner run.';
-      }
-      finishScreen.classList.remove('hidden');
+      ctx.shadowBlur = 0;
     }
 
     function drawFinishOverlay() {
       if (!levelDone) return;
+
       const boxW = Math.min(520, W * 0.78);
       const boxH = 120;
-      const x = W / 2 - boxW / 2;
-      const y = 54;
+      const boxX = W / 2 - boxW / 2;
+      const boxY = 54;
+
       ctx.save();
-      ctx.fillStyle = 'rgba(10, 8, 28, 0.55)';
-      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.fillStyle = "rgba(10, 8, 28, 0.55)";
+      ctx.strokeStyle = "rgba(255,255,255,0.22)";
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(x, y, boxW, boxH, 22);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 30px Arial';
-      ctx.fillText('Finish reached!', W / 2, y + 42);
-      ctx.font = 'bold 18px Arial';
-      ctx.fillStyle = '#fde68a';
-      ctx.fillText(currentLevel >= 50 ? 'All levels conquered • enjoy your victory' : 'Level complete • reward collected • ready for next run', W / 2, y + 78);
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.font = "bold 30px Arial";
+      ctx.fillText("Finish reached!", W / 2, boxY + 42);
+
+      ctx.font = "bold 18px Arial";
+      ctx.fillStyle = "#fde68a";
+      ctx.fillText("Level complete • reward collected • ready for next run", W / 2, boxY + 78);
       ctx.restore();
     }
 
-    function draw() { drawBackground(); drawWaveTunnel(); drawSparkles(); drawConfetti(); drawPlayer(); drawFinishOverlay(); }
-    function loop() {
-      if (!gameStarted || paused || gameOver) return;
-      frame++;
-      if (!levelDone) {
-        updatePlayer();
-        updateWalls();
-        checkCollision();
+    function draw() {
+      drawBackground();
+      drawTunnel();
+      drawSparkles();
+      drawPlayer();
+      drawFinishOverlay();
+    }
+
+    let lastFrameTime = 0;
+    const FRAME_MS = 1000 / 60;
+
+    function loop(timestamp = 0) {
+      if (!gameStarted || paused || gameOver || levelDone) return;
+
+      if (timestamp - lastFrameTime < FRAME_MS) {
+        animationId = requestAnimationFrame(loop);
+        return;
       }
+
+      lastFrameTime = timestamp;
+      frame++;
+
+      updatePlayer();
+      updateWalls();
       updateSparkles();
+      checkCollision();
       draw();
+
       animationId = requestAnimationFrame(loop);
     }
 
-    function togglePause() { if (!gameStarted || gameOver || levelDone) return; paused = !paused; statusEl.textContent = paused ? 'Paused' : 'Running'; if (!paused) loop(); }
-    async function toggleFullscreen() { if (!document.fullscreenElement) await document.documentElement.requestFullscreen().catch(() => {}); else await document.exitFullscreen().catch(() => {}); }
+    function togglePause() {
+      if (!gameStarted || gameOver || levelDone) return;
+      paused = !paused;
+      statusEl.textContent = paused ? "Paused" : "Running";
+      document.getElementById("pauseBtn").textContent = paused ? "Resume" : "Pause";
+      if (!paused) loop();
+    }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); holding = true; }
-      if (e.code === 'KeyP') togglePause();
-      if (e.code === 'KeyF') toggleFullscreen();
-      if (e.code === 'Escape' && menuScreen.classList.contains('hidden')) openMenu();
+    async function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch {
+        showToast("Fullscreen not available");
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.code === "Space" || e.code === "ArrowUp") && !menuScreen.classList.contains("hidden")) return;
+
+      if (e.code === "Space" || e.code === "ArrowUp") {
+        e.preventDefault();
+        holding = true;
+      }
+
+      if (e.code === "KeyP") togglePause();
+      if (e.code === "KeyF") toggleFullscreen();
+
+      if (e.code === "Escape" && !menuScreen.classList.contains("hidden")) {
+        closeMenu();
+        if (!gameStarted) startGame(currentLevel);
+      }
     });
-    document.addEventListener('keyup', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') holding = false; });
-    canvas.addEventListener('mousedown', () => holding = true);
-    canvas.addEventListener('mouseup', () => holding = false);
-    canvas.addEventListener('mouseleave', () => holding = false);
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); holding = true; }, { passive: false });
-    canvas.addEventListener('touchend', () => holding = false);
 
-    document.getElementById('playBtn').onclick = () => startGame(Number(levelSelect.value || currentLevel));
-    document.getElementById('loginBtn').onclick = loginFlow;
-    document.getElementById('registerBtn').onclick = registerFlow;
-    document.getElementById('logoutBtn').onclick = () => {
-      clearSession();
-      store = defaultStore();
-      selectedDifficulty = store.selectedDifficulty;
-      selectedSkin = store.selectedSkin;
-      updateTopbar();
-      showToast('Logged out');
-      openMenu(homePage);
-    };
-    document.getElementById('adminBtn').onclick = () => {
-      if (!currentUser || !isAdmin) return showToast('Admin account only');
-      const pass = prompt('Confirm admin password');
-      if (pass === currentUser.password) {
-        populateAdminUsers();
-        renderAdminUsersTable();
-        renderFeedbackViews();
-        showToast('Admin panel opened');
-        showPage(adminPage);
+    document.addEventListener("keyup", (e) => {
+      if (e.code === "Space" || e.code === "ArrowUp") {
+        holding = false;
+      }
+    });
+
+    canvas.addEventListener("mousedown", () => holding = true);
+    canvas.addEventListener("mouseup", () => holding = false);
+    canvas.addEventListener("mouseleave", () => holding = false);
+    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); holding = true; }, { passive: false });
+    canvas.addEventListener("touchend", () => holding = false);
+
+    document.getElementById("playBtn").onclick = () => startGame(Number(levelSelect.value || 1));
+    document.getElementById("difficultyBtn").onclick = () => showPage(difficultyPage);
+    document.getElementById("skinsBtn").onclick = () => { renderSkins(); showPage(skinsPage); };
+    document.getElementById("spinBtn").onclick = () => { renderSpinPage(); showPage(spinPage); };
+    document.getElementById("optionsBtn").onclick = () => showPage(optionsPage);
+    document.getElementById("continueBtn").onclick = () => startGame(store.lastLevel || 1);
+    document.getElementById("levelsBtn").onclick = () => { renderLevels(); showPage(levelsPage); };
+    document.getElementById("rewardsBtn").onclick = () => { renderSpinPage(); showPage(spinPage); };
+    document.getElementById("aboutBtn").onclick = () => showPage(aboutPage);
+
+    document.getElementById("adminBtn").onclick = () => {
+      const pass = prompt("Admin password:");
+      if (pass === ADMIN_PASS) {
+        isAdmin = true;
+        showToast("Admin mode enabled");
+        openMenu(adminPage);
+        subscribeAdminUsers();
       } else if (pass !== null) {
-        showToast('Wrong password');
+        showToast("Wrong password");
       }
     };
-    document.getElementById('difficultyBtn').onclick = () => showPage(difficultyPage);
-    document.getElementById('skinsBtn').onclick = () => { if (!requireLogin()) return; renderSkins(); showPage(skinsPage); };
-    document.getElementById('spinBtn').onclick = () => { if (!requireLogin()) return; renderSpinPage(); showPage(spinPage); };
-    document.getElementById('optionsBtn').onclick = () => { if (!requireLogin()) return; showPage(optionsPage); };
-    document.getElementById('continueBtn').onclick = () => startGame(store.lastLevel || 1);
-    document.getElementById('levelsBtn').onclick = () => { if (!requireLogin()) return; renderLevelsGrid(); showPage(levelsPage); };
-    document.getElementById('rewardsBtn').onclick = () => { if (!requireLogin()) return; renderSpinPage(); showPage(spinPage); };
-    document.getElementById('feedbackBtn').onclick = () => { if (!requireLogin()) return; renderFeedbackViews(); showPage(feedbackPage); };
-    document.getElementById('aboutBtn').onclick = () => showPage(aboutPage);
 
-    document.getElementById('difficultyPlayBtn').onclick = () => startGame(Number(levelSelect.value || currentLevel));
-    document.getElementById('difficultyBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('skinsBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('spinBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('levelsBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('optionsBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('aboutBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('feedbackBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('adminBackBtn').onclick = () => showPage(homePage);
-    document.getElementById('adminLogoutBtn').onclick = () => {
-      showToast('Admin panel closed');
+    document.getElementById("difficultyPlayBtn").onclick = () => startGame(Number(levelSelect.value || 1));
+    document.getElementById("difficultyBackBtn").onclick = () => showPage(homePage);
+    document.getElementById("skinsBackBtn").onclick = () => showPage(homePage);
+    document.getElementById("spinBackBtn").onclick = () => showPage(homePage);
+    document.getElementById("levelsBackBtn").onclick = () => showPage(homePage);
+    document.getElementById("optionsBackBtn").onclick = () => showPage(homePage);
+    document.getElementById("aboutBackBtn").onclick = () => showPage(homePage);
+    document.getElementById("adminBackBtn").onclick = () => showPage(homePage);
+
+    document.getElementById("adminLogoutBtn").onclick = () => {
+      isAdmin = false;
+      showToast("Admin mode disabled");
       showPage(homePage);
     };
 
-    document.getElementById('unlockAllSkinsBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      store.ownedSkins = skins.map(s => s.id); saveStore(); syncSkinOwnership(); updateTopbar(); renderSkins(); showToast('All skins unlocked');
-    };
-    document.getElementById('resetSpinBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      store.lastSpinAt = 0; saveStore(); renderSpinPage(); showToast('Daily spin reset');
-    };
-    document.getElementById('setAdminLevelBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      currentLevel = Number(document.getElementById('adminLevelSelect').value); levelSelect.value = String(currentLevel); levelEl.textContent = currentLevel; store.lastLevel = currentLevel; saveStore(); renderLevelsGrid(); showToast('Current level updated');
-    };
-    document.getElementById('unlockAllLevelsBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      store.bestUnlocked = 50; saveStore(); updateTopbar(); showToast('All 50 levels unlocked');
-    };
-    document.getElementById('adminAddCoinsToUserBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      const username = document.getElementById('adminUserSelect').value;
-      const user = users.find(u => u.username === username);
-      if (!user) return;
-      if (user.username === ADMIN_USERNAME) return showToast('Protected admin account');
-      user.data = normalizeStore(user.data || {});
-      user.data.coins += 250;
-      saveUsers();
-      if (currentUser && currentUser.username === username) {
-        store = normalizeStore(user.data);
-        updateTopbar();
-      }
-      renderAdminUsersTable();
-      showToast(`+250 coins to ${username}`);
-    };
-    document.getElementById('adminRemoveCoinsFromUserBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      const username = document.getElementById('adminUserSelect').value;
-      const user = users.find(u => u.username === username);
-      if (!user) return;
-      user.data = normalizeStore(user.data || {});
-      user.data.coins = Math.max(0, user.data.coins - 250);
-      saveUsers();
-      renderAdminUsersTable();
-      showToast(`-250 coins from ${username}`);
-    };
-    document.getElementById('adminResetUserProgressBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      const username = document.getElementById('adminUserSelect').value;
-      const user = users.find(u => u.username === username);
-      if (!user) return;
-      if (user.username === ADMIN_USERNAME) return showToast('Cannot reset admin account');
-      user.data = defaultStore();
-      saveUsers();
-      if (currentUser && currentUser.username === username) {
-        store = defaultStore();
-        selectedDifficulty = store.selectedDifficulty;
-        selectedSkin = store.selectedSkin;
-        updateTopbar();
-      }
-      renderAdminUsersTable();
-      showToast(`Reset progress: ${username}`);
-    };
-    document.getElementById('banUserBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      const username = document.getElementById('adminUserSelect').value;
-      const user = users.find(u => u.username === username);
-      if (!user || user.username === ADMIN_USERNAME) return showToast('Cannot ban this account');
-      const reason = document.getElementById('banReasonInput').value.trim() || 'Violation of game rules';
-      const duration = document.getElementById('banDurationSelect').value;
-      user.banned = {
-        active: true,
-        reason,
-        bannedAt: Date.now(),
-        until: duration === 'permanent' ? null : Date.now() + Number(duration)
-      };
-      saveUsers();
-      renderAdminUsersTable();
-      showToast(`Banned ${username}`);
-    };
-    document.getElementById('unbanUserBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      const username = document.getElementById('adminUserSelect').value;
-      const user = users.find(u => u.username === username);
-      if (!user) return;
-      user.banned = { active: false, reason: '', until: null, bannedAt: null };
-      saveUsers();
-      renderAdminUsersTable();
-      showToast(`Unbanned ${username}`);
-    };
-    document.getElementById('adminUserSearch').oninput = () => {
-      populateAdminUsers();
-      renderAdminUsersTable();
+    document.getElementById("refreshUsersBtn").onclick = () => {
+      subscribeAdminUsers();
+      showToast(firebaseReady ? "Users refreshed" : "Firebase not ready");
     };
 
-    document.getElementById('submitFeedbackBtn').onclick = () => {
-      if (!requireLogin()) return;
-      const message = document.getElementById('feedbackMessage').value.trim();
-      if (!message) return showToast('Write a message first');
-      feedbackEntries.push({
-        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`,
-        username: currentUser.username,
-        type: document.getElementById('feedbackType').value,
-        message,
-        createdAt: new Date().toISOString(),
-        read: false
-      });
-      saveFeedback();
-      document.getElementById('feedbackMessage').value = '';
-      renderFeedbackViews();
-      showToast('Feedback submitted');
-    };
-    document.getElementById('feedbackFilter').onchange = renderFeedbackViews;
-    document.getElementById('feedbackUserFilter').oninput = renderFeedbackViews;
-    document.getElementById('markFeedbackReadBtn').onclick = () => {
-      if (!isAdmin) return showToast('Admin only');
-      const mode = document.getElementById('feedbackFilter').value;
-      const userFilter = document.getElementById('feedbackUserFilter').value.toLowerCase();
-      feedbackEntries.forEach(entry => {
-        if ((mode === 'all' || !entry.read) && (!userFilter || entry.username.toLowerCase().includes(userFilter))) entry.read = true;
-      });
-      saveFeedback();
-      renderFeedbackViews();
-      showToast('Marked as read');
+    document.getElementById("forceSyncBtn").onclick = async () => {
+      await syncCurrentUserToCloud();
+      showToast(firebaseReady ? "User synced to Firebase" : "Saved only locally");
     };
 
-    document.getElementById('doSpinBtn').onclick = doDailySpin;
-    document.getElementById('playChosenLevelBtn').onclick = () => startGame(Number(levelSelect.value));
-    document.getElementById('toggleGlowBtn').onclick = () => {
-      glowEnabled = !glowEnabled; store.glowEnabled = glowEnabled; saveStore(); showToast(glowEnabled ? 'Glow enabled' : 'Glow disabled');
+    document.getElementById("add100CoinsBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      store.coins += 100;
+      saveGame();
+      updateTopUI();
+      renderSkins();
+      showToast("+100 coins added");
     };
-    document.getElementById('toggleFunnyBtn').onclick = () => {
-      funnyEnabled = !funnyEnabled; store.funnyEnabled = funnyEnabled; saveStore(); showToast(funnyEnabled ? 'Funny text enabled' : 'Funny text disabled');
+
+    document.getElementById("add500CoinsBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      store.coins += 500;
+      saveGame();
+      updateTopUI();
+      renderSkins();
+      showToast("+500 coins added");
     };
-    document.getElementById('resetSaveBtn').onclick = () => {
-      if (!confirm('Reset all local users and progress?')) return;
-      localStorage.removeItem('wave_rush_deluxe_save');
-      localStorage.removeItem('wave_rush_deluxe_users');
-      localStorage.removeItem('wave_rush_deluxe_session');
+
+    document.getElementById("set9999CoinsBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      store.coins = 9999;
+      saveGame();
+      updateTopUI();
+      renderSkins();
+      showToast("Coins set to 9999");
+    };
+
+    document.getElementById("unlockAllSkinsBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      store.ownedSkins = skins.map(s => s.id);
+      saveGame();
+      syncOwnedSkins();
+      updateTopUI();
+      renderSkins();
+      showToast("All skins unlocked");
+    };
+
+    document.getElementById("resetSpinBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      store.lastSpinAt = 0;
+      saveGame();
+      renderSpinPage();
+      showToast("Daily spin reset");
+    };
+
+    document.getElementById("setAdminLevelBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      currentLevel = Number(document.getElementById("adminLevelSelect").value);
+      levelSelect.value = String(currentLevel);
+      levelEl.textContent = currentLevel;
+      store.lastLevel = currentLevel;
+      saveGame();
+      renderLevels();
+      showToast("Current level updated");
+    };
+
+    document.getElementById("unlockAllLevelsBtn").onclick = () => {
+      if (!isAdmin) return showToast("Admin only");
+      store.bestUnlocked = 50;
+      saveGame();
+      updateTopUI();
+      renderLevels();
+      showToast("All 50 levels unlocked");
+    };
+
+    document.getElementById("doSpinBtn").onclick = doSpin;
+
+    document.getElementById("playChosenLevelBtn").onclick = () => {
+      const chosen = Number(levelSelect.value || 1);
+      if (chosen > store.bestUnlocked) {
+        showToast("Ky level hala nuk është unlock.");
+        return;
+      }
+      startGame(chosen);
+    };
+
+    document.getElementById("toggleGlowBtn").onclick = () => {
+      glowEnabled = !glowEnabled;
+      store.glowEnabled = glowEnabled;
+      saveGame();
+      showToast(glowEnabled ? "Glow enabled" : "Glow disabled");
+    };
+
+    document.getElementById("toggleFunnyBtn").onclick = () => {
+      funnyEnabled = !funnyEnabled;
+      store.funnyEnabled = funnyEnabled;
+      saveGame();
+      showToast(funnyEnabled ? "Funny text enabled" : "Funny text disabled");
+    };
+
+    document.getElementById("resetSaveBtn").onclick = () => {
+      if (!confirm("Are you sure? This will reset all progress.")) return;
+      localStorage.removeItem("wave_rush_deluxe_save");
       location.reload();
     };
 
-    document.getElementById('volumeRange').oninput = (e) => {
-      store.volume = Number(e.target.value); document.getElementById('volumeValue').textContent = store.volume; saveStore();
+    document.getElementById("volumeRange").oninput = (e) => {
+      store.volume = Number(e.target.value);
+      document.getElementById("volumeValue").textContent = store.volume;
+      saveGame();
     };
 
-    document.getElementById('menuBtn').onclick = () => openMenu();
-    document.getElementById('pauseBtn').onclick = togglePause;
-    document.getElementById('fullscreenBtn').onclick = toggleFullscreen;
-    document.getElementById('restartBtn').onclick = () => startGame(currentLevel);
-    document.getElementById('nextLevelBtn').onclick = () => {
-      if (currentLevel >= 50) return openMenu(homePage);
-      const nextLevel = Math.min(50, currentLevel + 1);
-      if (nextLevel > store.bestUnlocked && !isAdmin) return showToast('Next level locked');
-      startGame(nextLevel);
-    };
-    levelSelect.onchange = () => { currentLevel = Number(levelSelect.value); renderLevelsGrid(); };
-    document.getElementById('finishNextBtn').onclick = () => {
-      finishScreen.classList.add('hidden');
-      if (currentLevel >= 50) return openMenu(homePage);
-      const nextLevel = Math.min(50, currentLevel + 1);
-      if (nextLevel > store.bestUnlocked && !isAdmin) return showToast('Next level locked');
-      startGame(nextLevel);
-    };
-    document.getElementById('finishRestartBtn').onclick = () => {
-      finishScreen.classList.add('hidden');
-      startGame(currentLevel);
-    };
-    document.getElementById('finishMenuBtn').onclick = () => {
-      finishScreen.classList.add('hidden');
-      openMenu(homePage);
+    document.getElementById("menuBtn").onclick = () => openMenu();
+    document.getElementById("pauseBtn").onclick = togglePause;
+    document.getElementById("fullscreenBtn").onclick = toggleFullscreen;
+    document.getElementById("restartBtn").onclick = () => startGame(currentLevel);
+
+    levelSelect.onchange = () => {
+      currentLevel = Number(levelSelect.value);
+      renderLevels();
     };
 
-    const sessionUser = getSessionUser();
-    if (sessionUser && setCurrentUser(sessionUser)) {
-      syncSkinOwnership();
+    if (window.innerWidth < 900) {
+      glowEnabled = false;
+      store.glowEnabled = false;
+      saveGame();
     }
-    updateTopbar();
+
+    updateTopUI();
     renderDifficultyCards();
     renderSkins();
     renderSpinPage();
-    renderLevelsGrid();
+    renderLevels();
+    renderAdminUsers();
+    initializeFirebase().then(() => subscribeAdminUsers());
     draw();
   </script>
 </body>
